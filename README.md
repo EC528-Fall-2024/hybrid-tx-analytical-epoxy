@@ -1,5 +1,12 @@
 # Hybrid Transactional/Analytical Processing using Epoxy
 
+## 0. Team Members
+Lukas Chin\
+Lucia Gill\
+David Li\
+Jason Li\
+Jiawei Sun
+
 ## 1.   Vision and Goals Of The Project:
 
 The goal of this project is to create an implementation of Epoxy to enable accessing multiple databases (MySQL, FoundationDB, DuckDB) or storage systems (S3) through a single interface to allow rapid read and writes between databases.
