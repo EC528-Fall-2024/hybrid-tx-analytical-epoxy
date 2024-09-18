@@ -21,7 +21,7 @@ The goal of this project is to create an implementation of Epoxy to enable acces
 
 2. **Jason**
 
-    - **Wants:** Jason is the main software developer of BUBook and wants to write new algorithms to get better user retention on the platform.
+    - **Wants:** Jason is the main software developer of BUBook and wants to write a new algorithm every week to get better user retention on the platform.
     - **Needs:** Jason needs to extract, transform, and load all of the data from David's fast database into an analytical database so that he can process the data and write a new and more effective algorithm.
 
 3. **Lucia**
