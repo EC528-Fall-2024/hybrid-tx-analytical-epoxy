@@ -55,7 +55,19 @@ This section discusses the implications and reasons of the design decisions made
 
 ## 5. Acceptance criteria
 
-This section discusses the minimum acceptance criteria at the end of the project and stretch goals.
+Minimum Accepted Criteria:
+
+-   Implement Epoxy or build off of another implementation  similar to Epoxy
+-   Include a OLTP and OLAP database in the Epoxy layer
+-   Write a ELT (Extract-Transform-load) implementation that works with Epoxy and comunicates between the two databases 
+-   Test and Benchmark our program with complex databases
+
+Stretch Goals:
+
+-   Implement S3 as database 
+-   Improve write performance
+-   Work with Massachuset Massachuttes Open Cloud (MOC) 
+
 
 ## 6.  Release Planning:
 
