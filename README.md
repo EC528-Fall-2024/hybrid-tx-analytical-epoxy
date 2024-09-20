@@ -33,9 +33,47 @@ The goal of this project is to create an implementation of Epoxy to enable acces
 
 ## 3.   Scope and Features Of The Project:
 
-The Scope places a boundary around the solution by detailing the range of features and functions of the project. This section helps to clarify the solution scope and can explicitly state what will not be delivered as well.
+The scope of this project is to build a **Hybrid Transactional/Analytical Processing (HTAP)** system using Epoxy, integrating both **OLTP (Online Transaction Processing)** and **OLAP (Online Analytical Processing)** databases through a unified interface. This solution of Epoxy will enable transactions across diverse data stores without relying on the costly two-phase commit protocol.
 
-It should be specific enough that you can determine that e.g. feature A is in-scope, while feature B is out-of-scope.
+### In-Scope Features:
+
+1. Integration of OLTP and OLAP Databases
+
+    - Implement an HTAP system using Epoxy to combine OLTP (FoundationDB) and OLAP (DuckDB) databases.
+    - Handle both real-time and batched updates with a focus on atomicity (ensuring complete or no transactions) and isolation (transactions are executed independently of each other).
+
+2. OLTP Operations (Handling Transactions)
+
+    - Develop and optimize OLTP operations in FoundationDB for real-time, high-frequency transactions.
+    - Support transactional integrity and maintain data consistency within transactions.
+
+3. OLAP Operations (Running Analytics)
+
+    - Implement OLAP operations using DuckDB to handle large-scale analytical queries, enabling batch processing and complex data analysis.
+    - Ensure that OLAP queries can efficiently process large datasets without affecting the performance of real-time OLTP transactions.
+
+4. ELT Workflow Development
+
+    - Build an Extract-Transform-Load (ETL) process to transfer data between OLTP and OLAP systems, ensuring seamless updates and synchronization between the two systems.
+
+5. Performance Optimization
+
+    - Optimize the system for performance, including disk page compression and other improvements for minimizing time and resources during transactions.
+
+6. Benchmarking and Testing
+
+    - Benchmark the HTAP system against existing solutions (e.g., Apache Hive) to evaluate its performance on an existing database.
+
+### Out-Of-Scope Features:
+
+1. Two-Phase Commit Protocol
+
+    - The project will not rely on the traditional two-phase commit protocol for ensuring transactional integrity, as Epoxy is designed to operate without it.
+
+2. Modifications to Database Systems
+
+    - There will be no modification on the OLTP and OLAP database systems, since the sole goal of this project is to integrate the two through Epoxy's interface.
+
 
 ** **
 
