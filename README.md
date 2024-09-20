@@ -81,7 +81,8 @@ The scope of this project is to build a **Hybrid Transactional/Analytical Proces
 
 This section provides a high-level outline of the solution.
 
-Global Architectural Structure Of the Project:
+Global Architecture of HTAP with Epoxy:
+<img width="713" alt="EpoxyArchitecture" src="https://github.com/user-attachments/assets/be94763c-c62c-48c4-a106-143334b6f0c5">
 
 This section provides a high-level architecture or a conceptual diagram showing the scope of the solution. If wireframes or visuals have already been done, this section could also be used to show how the intended solution will look. This section also provides a walkthrough explanation of the architectural structure.
 
