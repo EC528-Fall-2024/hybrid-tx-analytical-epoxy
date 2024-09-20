@@ -79,18 +79,34 @@ The scope of this project is to build a **Hybrid Transactional/Analytical Proces
 
 ## 4. Solution Concept
 
-This section provides a high-level outline of the solution.
+A high-level architecture of the Hybrid Transactional/Analytical Processing (HTAP) system using Epoxy. The system is designed to handle both transactional and analytical workloads seamlessly, ensuring real-time insights and consistency.
 
-Global Architecture of HTAP with Epoxy:
 <img width="713" alt="EpoxyArchitecture" src="https://github.com/user-attachments/assets/be94763c-c62c-48c4-a106-143334b6f0c5">
 
-This section provides a high-level architecture or a conceptual diagram showing the scope of the solution. If wireframes or visuals have already been done, this section could also be used to show how the intended solution will look. This section also provides a walkthrough explanation of the architectural structure.
+Walkthrough of the Architectural Structure
+
+- Transaction Initiation: A user action (e.g., placing an order, updating a record) triggers the Epoxy layer, which manages the transaction lifecycle and initiates communication with the OLTP database.
+
+
+- Data Updates: The OLTP database processes the transaction, updating relevant records in real-time. This could involve writing to multiple tables depending on the nature of the operation.
+
+
+- Replication to OLAP: Epoxy replicates the changes through an ETL workflow to a columnar store (e.g., DuckDB) designed for analytical processing. This replication occurs simultaneously, ensuring that both transactional and analytical databases are updated in real time.
+
+
+- Conflict Resolution: Before finalizing the transaction, Epoxy performs a consistency check to detect any conflicts between the OLTP and OLAP stores. This step is crucial for maintaining data integrity and ensuring that all changes are valid.
+
+
+- Commit Process: If no conflicts are detected, the transaction is committed in the OLTP database. At this point, changes become visible across all involved data stores, allowing for immediate data access.
+
+
+- Real-time Analytics: After the commit, users can run analytical queries on the OLAP store. These queries leverage the most up-to-date transactional data, enabling real-time insights and analytics that can inform decision-making and operational adjustments.
 
  
 
 Design Implications and Discussion:
 
-This section discusses the implications and reasons of the design decisions made during the global architecture design.
+The design decisions for the HTAP system focus on leveraging Epoxy's transaction logic to enable fast, batched writes to OLAP data stores without conflicting with the OLTP transaction system. This approach ensures data consistency and integrity across both workloads. Additionally, developing an ETL (Extract-Transform-Load) workflow facilitates efficient data transfer between OLTP and OLAP systems, enhancing real-time analytics capabilities. By prioritizing these elements, the architecture remains robust and adaptable, supporting timely decision-making across various applications while maintaining high performance.
 
 ## 5. Acceptance criteria
 
