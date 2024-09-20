@@ -126,7 +126,15 @@ Stretch Goals:
 
 ## 6.  Release Planning:
 
-Release planning section describes how the project will deliver incremental sets of features and functions in a series of releases to completion. Identification of user stories associated with iterations that will ease/guide sprint planning sessions is encouraged. Higher level details for the first iteration is expected.
+### Sprints:
+
+-   Find datasets and implement Epoxy
+-   Add the two databases onto the Epoxy layer, and add dataset in the OLTP
+-   Implement ETL 
+-   Benchmark against similar ETL implementations
+-   Improve write performance 
+
+* Note: Once our sprint schedule is known, we will update this section with specific sprint/release dates.
 
 ## 7.  Resources:
 
@@ -141,11 +149,3 @@ Release planning section describes how the project will deliver incremental sets
 Remember that you can always add features at the end of the semester, but you can't go back in time and gain back time you spent on features that you couldn't complete.
 
 ** **
-
-For more help on markdown, see
-https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet
-
-In particular, you can add images like this (clone the repository to see details):
-
-![alt text](https://github.com/BU-NU-CLOUD-SP18/sample-project/raw/master/cloud.png "Hover text")
-
