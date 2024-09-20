@@ -111,6 +111,12 @@ Stretch Goals:
 
 Release planning section describes how the project will deliver incremental sets of features and functions in a series of releases to completion. Identification of user stories associated with iterations that will ease/guide sprint planning sessions is encouraged. Higher level details for the first iteration is expected.
 
+## 7.  Resources:
+
+- Epoxy original Paper: https://www.google.com/url?q=https://petereliaskraft.net/res/p2732-kraft.pdf&sa=D&source=editors&ust=1726857165369021&usg=AOvVaw2Pc4xnTr_hCMSMBesATRi4
+- Epoxy Simplfied explination: https://www.google.com/url?q=https://muratbuffalo.blogspot.com/2023/11/epoxy-acid-transactions-across-diverse.html&sa=D&source=editors&ust=1726857165369400&usg=AOvVaw1rpSAR_4dFpcT6gvIVj1gX
+- Epoxy github: https://github.com/DBOS-project/apiary 
+
 ** **
 
 ## General comments
