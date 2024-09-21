@@ -1,11 +1,16 @@
 # Hybrid Transactional/Analytical Processing using Epoxy
 
-## 0. Team Members
+##  Team Members
 Lukas Chin\
 Lucia Gill\
 David Li\
 Jason Li\
 Jiawei Sun
+
+## Mentors 
+Dan Lambright\
+Orran Krieger\
+Ata Turk
 
 ## 1.   Vision and Goals Of The Project:
 
@@ -19,10 +24,14 @@ The goal of this project is to create an implementation of Epoxy to enable acces
     - **Wants:** David is the creator of a new social media platform called BUBook and needs to store every piece of information that every user does on his platform including liking posts, followers, favorites, etc.
     - **Needs:** David needs a fast database to collect all of this information, and he wants it to be updated in real-time.
 
+<br>
+
 2. **Jason**
 
     - **Wants:** Jason is the main software developer of BUBook and wants to write a new algorithm every week to get better user retention on the platform.
     - **Needs:** Jason needs to extract, transform, and load all of the data from David's fast database into an analytical database so that he can process the data and write a new and more effective algorithm.
+
+<br>
 
 3. **Lucia**
 
@@ -34,6 +43,8 @@ The goal of this project is to create an implementation of Epoxy to enable acces
 ## 3.   Scope and Features Of The Project:
 
 The scope of this project is to build a **Hybrid Transactional/Analytical Processing (HTAP)** system using Epoxy, integrating both **OLTP (Online Transaction Processing)** and **OLAP (Online Analytical Processing)** databases through a unified interface. This solution of Epoxy will enable transactions across diverse data stores without relying on the costly two-phase commit protocol.
+
+<br>
 
 ### In-Scope Features:
 
@@ -64,6 +75,9 @@ The scope of this project is to build a **Hybrid Transactional/Analytical Proces
 
     - Benchmark the HTAP system against existing solutions (e.g., Apache Hive) to evaluate its performance on an existing database.
 
+
+<br>
+
 ### Out-Of-Scope Features:
 
 1. Two-Phase Commit Protocol
@@ -83,7 +97,9 @@ A high-level architecture of the Hybrid Transactional/Analytical Processing (HTA
 
 <img width="713" alt="EpoxyArchitecture" src="https://github.com/user-attachments/assets/be94763c-c62c-48c4-a106-143334b6f0c5">
 
-Walkthrough of the Architectural Structure
+
+\
+Walkthrough of the Architectural Structure:
 
 - Transaction Initiation: A user action (e.g., placing an order, updating a record) triggers the Epoxy layer, which manages the transaction lifecycle and initiates communication with the OLTP database.
 
@@ -102,8 +118,8 @@ Walkthrough of the Architectural Structure
 
 - Real-time Analytics: After the commit, users can run analytical queries on the OLAP store. These queries leverage the most up-to-date transactional data, enabling real-time insights and analytics that can inform decision-making and operational adjustments.
 
- 
 
+\
 Design Implications and Discussion:
 
 The design decisions for the HTAP system focus on leveraging Epoxy's transaction logic to enable fast, batched writes to OLAP data stores without conflicting with the OLTP transaction system. This approach ensures data consistency and integrity across both workloads. Additionally, developing an ETL (Extract-Transform-Load) workflow facilitates efficient data transfer between OLTP and OLAP systems, enhancing real-time analytics capabilities. By prioritizing these elements, the architecture remains robust and adaptable, supporting timely decision-making across various applications while maintaining high performance.
@@ -117,6 +133,7 @@ Minimum Accepted Criteria:
 -   Write a ELT (Extract-Transform-load) implementation that works with Epoxy and comunicates between the two databases 
 -   Test and Benchmark our program with complex databases
 
+\
 Stretch Goals:
 
 -   Implement S3 as database 
@@ -128,24 +145,26 @@ Stretch Goals:
 
 ### Sprints:
 
--   Find datasets and implement Epoxy
--   Add the two databases onto the Epoxy layer, and add dataset in the OLTP
--   Implement ETL 
--   Benchmark against similar ETL implementations
--   Improve write performance 
+Sprint 1. Find datasets and implement Epoxy
 
-* Note: Once our sprint schedule is known, we will update this section with specific sprint/release dates.
+Sprint 2. Add the two databases onto the Epoxy layer, and add dataset in the OLTP
+
+Sprint 3. Implement ETL 
+
+Sprint 4. Benchmark against similar ETL implementations
+
+Sprint 5. Improve write performance 
+
+ Note: Once our sprint schedule is known, we will update this section with specific sprint/release dates.
 
 ## 7.  Resources:
 
 - Epoxy original Paper: https://www.google.com/url?q=https://petereliaskraft.net/res/p2732-kraft.pdf&sa=D&source=editors&ust=1726857165369021&usg=AOvVaw2Pc4xnTr_hCMSMBesATRi4
+
 - Epoxy Simplfied explination: https://www.google.com/url?q=https://muratbuffalo.blogspot.com/2023/11/epoxy-acid-transactions-across-diverse.html&sa=D&source=editors&ust=1726857165369400&usg=AOvVaw1rpSAR_4dFpcT6gvIVj1gX
+
 - Epoxy github: https://github.com/DBOS-project/apiary 
 
 ** **
 
-## General comments
 
-Remember that you can always add features at the end of the semester, but you can't go back in time and gain back time you spent on features that you couldn't complete.
-
-** **
