@@ -27,7 +27,7 @@ The goal of this project is to create an implementation of Epoxy to enable acces
 3. **Lucia**
 
     - **Wants:** Lucia is the marketing manager of BUBook and wants to better advertise the platform so that more new users register and begin using BUBook.
-    - **Needs:** Lucia needs to fetch the data from Jason's analytical database to create inferences on making more more captivating digital ads.
+    - **Needs:** Lucia needs to fetch the data from Jason's analytical database to create inferences on making more captivating digital ads.
 
 ** **
 
