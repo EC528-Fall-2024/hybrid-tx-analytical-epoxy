@@ -12,9 +12,11 @@
 
 ## Mentors
 
-Dan Lambright
-Orran Krieger
-Ata Turk
+| Name           | Email              |
+| -------------- | ------------------ |
+| Dan Lambridght | dlambrig@gmail.com |
+| Orran Krieger  | okrieg@bu.edu      |
+| Ata Turk       | ataturk@bu.edu     |
 
 ## 0. Introduction to Epoxy
 
