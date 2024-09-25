@@ -81,7 +81,7 @@ The scope of this project is to build a **Hybrid Transactional/Analytical Proces
 
 2. OLTP Operations (Handling Transactions)
 
-    - Develop and optimize OLTP operations in FoundationDB for real-time, high-frequency transactions.
+    - Develop and optimize OLTP operations in mySQL (FoundationDB potentially if time applicable) for real-time, high-frequency transactions.
     - Support transactional integrity and maintain data consistency within transactions.
 
 3. OLAP Operations (Running Analytics)
@@ -89,9 +89,10 @@ The scope of this project is to build a **Hybrid Transactional/Analytical Proces
     - Implement OLAP operations using DuckDB to handle large-scale analytical queries, enabling batch processing and complex data analysis.
     - Ensure that OLAP queries can efficiently process large datasets without affecting the performance of real-time OLTP transactions.
 
-4. ELT Workflow Development
+4. ELT Workflow Development (new feature different from vanilla epoxy)
 
     - Build an Extract-Transform-Load (ETL) process to transfer data between OLTP and OLAP systems, ensuring seamless updates and synchronization between the two systems.
+    - Improve write efficiency in ETL data transfer process with same level of isolation with Epoxy (ideally).
 
 5. Performance Optimization
 
@@ -106,11 +107,22 @@ The scope of this project is to build a **Hybrid Transactional/Analytical Proces
 
 ### Out-Of-Scope Features:
 
-1. Two-Phase Commit Protocol
+1. **Two-Phase Commit Protocol**
 
+    - Definition: two-phase commit protocol (2PC, tupac) is a type of atomic commitment protocol (ACP). It is a distributed algorithm that coordinates all the processes that participate in a distributed atomic transaction on whether to commit or abort (roll back) the transaction.
+  
+    - Two-phases:
+  
+      In *commit-request phase* (or voting phase), the coordinator process sends a prepare request to all the participating nodes. Each participant tries to execute the transaction locally. If the local transaction was successful and the participant is ready to commit, it vote "Yes". Else, it vote "No".
+
+      In the *commit phase*, based on voting of the participants, the coordinator decides whether to commit (only if **all** have voted "Yes") or abort the transaction (if **any** has voted "No"), and notifies the result to all the participants. The participants then follow with the needed actions (commit or abort) with their local transactional resources (also called recoverable resources; e.g., database data) and their respective portions in the transaction's other output (if applicable).
+
+    - Related resources: [Wikipedia 2PC Definition](https://en.wikipedia.org/wiki/Two-phase_commit_protocol),
+   [Two-phase commit and beyond](https://muratbuffalo.blogspot.com/2018/12/2-phase-commit-and-beyond.html) by [MURAT](https://www.blogger.com/profile/07842046940394980130)
+      
     - The project will not rely on the traditional two-phase commit protocol for ensuring transactional integrity, as Epoxy is designed to operate without it.
 
-2. Modifications to Database Systems
+3. **Modifications to Database Systems**
 
     - There will be no modification on the OLTP and OLAP database systems, since the sole goal of this project is to integrate the two through Epoxy's interface.
 
