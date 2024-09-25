@@ -29,6 +29,18 @@ Next, let's compile Apiary. In the Apiary root directory, run:
 mvn -DskipTests package
 ```
 
+If running into this error:
+
+```shell
+[ERROR] Failed to execute goal org.xolstice.maven.plugins:protobuf-maven-plugin:0.6.1:compile (default) on project apiary: Unable to resolve artifact: Missing:
+[ERROR] ----------
+[ERROR] 1) com.google.protobuf:protoc:exe-x86_64:3.7.0
+```
+
+Inside of pom.xml in Apiary root directory:
+
+Replace `${os.detected.classifier}` in `com.google.protobuf:protoc:3.7.0:exe:${os.detected.classifier}` with `osx-x86_64`.
+
 ### Start Postgres in Docker
 
 Then, let's start Postgres using a Docker image. We recommend you [configure Docker](https://docs.docker.com/engine/install/linux-postinstall/) so it can be run by non-root users.
