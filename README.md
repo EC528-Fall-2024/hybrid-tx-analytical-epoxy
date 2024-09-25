@@ -169,7 +169,7 @@ Stretch Goals:
 ### Sprints:
 
 Sprint 1. Find datasets and implement Epoxy <br>
-[Sprint video]() |[Sprint slides](https://docs.google.com/presentation/d/17updjwpJJet0NcEK1xSxx1LHyAb83xCzIRcUtQwE-CQ/edit?usp=sharing)
+[Sprint video](https://youtu.be/DFNJatZPwU4) |[Sprint slides](https://docs.google.com/presentation/d/17updjwpJJet0NcEK1xSxx1LHyAb83xCzIRcUtQwE-CQ/edit?usp=sharing)
 
 Sprint 2. Add the two databases onto the Epoxy layer, and add dataset in the OLTP
 
