@@ -118,14 +118,14 @@ A high-level architecture of the Hybrid Transactional/Analytical Processing (HTA
 
 
 <p align="center">
-<img src="https://github.com/user-attachments/assets/e37eb3e6-9b3b-4c2b-b276-7afd557e88fc" width="50%">
+<img src="https://github.com/user-attachments/assets/e37eb3e6-9b3b-4c2b-b276-7afd557e88fc" width="80%">
 </p>
 <p align="center">
 Architectural Diagram from Paper
 </p>
 
 <p align="center">
-<img src="https://github.com/user-attachments/assets/be94763c-c62c-48c4-a106-143334b6f0c5" width="50%">
+<img src="https://github.com/user-attachments/assets/be94763c-c62c-48c4-a106-143334b6f0c5" width="80%">
 </p>
 <p align="center">
 Simplified View of Architectural Diagram
