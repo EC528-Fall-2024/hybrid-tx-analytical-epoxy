@@ -70,7 +70,7 @@ The scope of this project is to build a **Hybrid Transactional/Analytical Proces
 
 1. Integration of OLTP and OLAP Databases
 
-   - Implement an HTAP system using Epoxy to combine OLTP (FoundationDB) and OLAP (DuckDB) databases.
+   - Implement an HTAP system using Epoxy to combine OLTP (mySQL) and OLAP (DuckDB) databases.
    - Handle both real-time and batched updates with a focus on atomicity (ensuring complete or no transactions) and isolation (transactions are executed independently of each other).
 2. OLTP Operations (Handling Transactions)
 
@@ -80,7 +80,7 @@ The scope of this project is to build a **Hybrid Transactional/Analytical Proces
 
    - Implement OLAP operations using DuckDB to handle large-scale analytical queries, enabling batch processing and complex data analysis.
    - Ensure that OLAP queries can efficiently process large datasets without affecting the performance of real-time OLTP transactions.
-4. ELT Workflow Development (new feature different from vanilla epoxy)
+4. ETL Workflow Development (new feature different from vanilla epoxy)
 
    - Build an Extract-Transform-Load (ETL) process to transfer data between OLTP and OLAP systems, ensuring seamless updates and synchronization between the two systems.
    - Improve write efficiency in ETL data transfer process with same level of isolation with Epoxy (ideally).
@@ -135,7 +135,7 @@ Walkthrough of the Architectural Structure:
 
 - **Client Requests**: User actions trigger requests that are received by the Hybrid Transactional/Analytical Processing Database system.
 - **Transaction Coordinator**: A user action (e.g., placing an order, updating a record) triggers the Epoxy layer, which manages the transaction lifecycle and initiates communication with the OLTP database.
-- **Transactional Database**: An Online Transaction Processing (OLTP) database (e.g., FoundationDB) processes and stores transactional data in real-time.
+- **Transactional Database**: An Online Transaction Processing (OLTP) database (e.g. mySQL, FoundationDB) processes and stores transactional data in real-time.
 - **Epoxy Shim**: Executes local operations and interacts with the Transaction Coordinator to ensure
 - **Data Updates**: The OLTP database processes the transaction, updating relevant records in real-time. This could involve writing to multiple tables depending on the nature of the operation.
 - **ETL Pipeline**: Epoxy replicates the changes through an ETL workflow to a columnar store (e.g., DuckDB) designed for analytical processing. This replication occurs simultaneously, ensuring that both transactional and analytical databases are updated in real time.
@@ -153,7 +153,7 @@ Minimum Viable Product:
 
 - Implement the distributed transaction coordination system or develop a similar middleware for managing database operations across multiple data stores
 - Include a OLTP and OLAP database in the Epoxy layer
-- Write a ELT (Extract-Transform-load) implementation that works with Epoxy and comunicates between the two databases
+- Write a ETL (Extract-Transform-load) implementation that works with Epoxy and comunicates between the two databases
 - Test and Benchmark our program with complex databases
 
 Stretch Goals:
