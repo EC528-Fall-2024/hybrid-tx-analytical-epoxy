@@ -1,16 +1,39 @@
 # Hybrid Transactional/Analytical Processing using Epoxy
 
 ##  Team Members
-Lukas Chin\
-Lucia Gill\
-David Li\
-Jason Li\
-Jiawei Sun
+| Name        |     Email       |
+| ----------- | -----------     |
+| Lukas Chin  | lchin10@bu.edu  |
+| Lucia Gill  | luciagil@bu.edu |
+|   David Li  | dav@bu.edu      |
+|   Jason Li  | jli3469@bu.edu  |
+| Jiawei Sun  | alinajw@bu.edu  |
+
+
 
 ## Mentors 
 Dan Lambright\
 Orran Krieger\
 Ata Turk
+
+## 0. Introduction to Epoxy
+1. **What is Epoxy**
+
+    Epoxy is a protocol for providing ACID transactions across diverse data stores. It uses a primary transactional DBMS as a transaction coordinator for transactions among it and several potentially non-transactional secondary data stores. Epoxy is implemented in shim layers co-located with these data stores which intercept and interpose on client requests, but do not require modifications to the stores themselves.
+
+2. **Basic Structure**
+
+    Epoxy leverages Postgres transactional database as the coordinator and  extends multiversion concurrency control (MVCC) for cross-data store isolation. It provides isolation as well as atomicity and durability through its optimistic concurrency control (OCC) plus two-phase commit (2PC) protocol. Epoxy was implemented as a bolt-on shim layer for five diverse data stores: Postgres, MySQL, Elasticsearch, MongoDB, and Google Cloud Storage (GCS).
+
+3. **How it functions**
+   
+    - Each Epoxy transaction is linked to a snapshot, representing the set of all past transactions visible to it.
+   
+    - Epoxy secondary store shims enhance record versions with metadata to facilitate transactional read operations. Visibility of a record version to a transaction is determined by the presence of beginTxn in the transaction's snapshot, and the absence of endTxn in the transaction's snapshot.
+
+    - Due to the two-phase commit (2PC) protocol used by Epoxy, the secondary stores prepare first inside their databases, and then the primary concludes the transaction commit (or the abort) if all operations succeed (or any operation fail) on all data stores.
+
+   
 
 ## 1.   Vision and Goals Of The Project:
 
@@ -23,13 +46,15 @@ The goal of this project is to create an implementation of Epoxy to enable acces
 
     - **Wants:** David is the creator of a new social media platform called BUBook and needs to store every piece of information that every user does on his platform including liking posts, followers, favorites, etc.
     - **Needs:** David needs a fast database to collect all of this information, and he wants it to be updated in real-time.
-
+    - **How:** When David likes a post, a write operation is triggered. Epoxy (coordinator) then starts the transaction, handling the necessary write operations to an **OLTP** database, which might be retrieving a row with all columns, then update specific columns. Next, the transaction is committed if all operations are successful in the related data stores.
+      
 <br>
 
 2. **Jason**
 
     - **Wants:** Jason is the main software developer of BUBook and wants to write a new algorithm every week to get better user retention on the platform.
     - **Needs:** Jason needs to extract, transform, and load all of the data from David's fast database into an analytical database so that he can process the data and write a new and more effective algorithm.
+    - **How:** 
 
 <br>
 
@@ -37,6 +62,7 @@ The goal of this project is to create an implementation of Epoxy to enable acces
 
     - **Wants:** Lucia is the marketing manager of BUBook and wants to better advertise the platform so that more new users register and begin using BUBook.
     - **Needs:** Lucia needs to fetch the data from Jason's analytical database to create inferences on making more captivating digital ads.
+    - **How:** When Lucia fetches the data, a read operation is triggered. Epoxy then starts the transaction, handling the necessary write operations to an **OLAP** database, which might be retrieving informations from a column with all the rows. Next, the transaction is committed if all operations are successful in the related data stores.
 
 ** **
 
