@@ -116,7 +116,20 @@ The scope of this project is to build a **Hybrid Transactional/Analytical Proces
 
 A high-level architecture of the Hybrid Transactional/Analytical Processing (HTAP) system using Epoxy. The system is designed to handle both transactional and analytical workloads seamlessly, ensuring real-time insights and consistency.
 
-<img width="713" alt="EpoxyArchitecture" src="https://github.com/user-attachments/assets/be94763c-c62c-48c4-a106-143334b6f0c5">
+
+<p align="center">
+<img src="https://github.com/user-attachments/assets/e37eb3e6-9b3b-4c2b-b276-7afd557e88fc" width="50%">
+</p>
+<p align="center">
+Architectural Diagram from Paper
+</p>
+
+<p align="center">
+<img src="https://github.com/user-attachments/assets/be94763c-c62c-48c4-a106-143334b6f0c5" width="50%">
+</p>
+<p align="center">
+Simplified View of Architectural Diagram
+</p>
 
 Walkthrough of the Architectural Structure:
 
