@@ -127,12 +127,15 @@ Architectural Diagram from Paper
 </p>
 
 <p align="center">
-<img src="https://github.com/user-attachments/assets/be94763c-c62c-48c4-a106-143334b6f0c5" width="80%">
+<img src="https://github.com/user-attachments/assets/fd16707c-8400-4eb8-9e4f-00b2ccd5aead" width="80%">
 </p>
 <p align="center">
-Simplified View of Architectural Diagram
+Simplified View of HTAP Diagram
 </p>
 
+
+
+ 
 Walkthrough of the Architectural Structure:
 
 - **Client Requests**: User actions trigger requests that are received by the Hybrid Transactional/Analytical Processing Database system.
