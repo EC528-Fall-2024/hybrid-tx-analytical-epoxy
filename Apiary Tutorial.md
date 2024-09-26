@@ -2,7 +2,7 @@
 
 This tutorial will show you how to build a simple social network web application using Apiary and [Spring Boot](https://spring.io/projects/spring-boot). We use Apiary's Postgres backend. Make sure to have Docker installed and no existing Docker image running.
 
-To start, clone Apiary to your local environment:
+To start, clone [Apiary](https://github.com/DBOS-project/apiary) to your local environment:
 
     git clone https://github.com/DBOS-project/apiary.git
     cd apiary
@@ -166,3 +166,5 @@ Try following steps:
 Then, navigate to `localhost:8081` to view this new social network! You should see the Nectar homepage:
 
 <img src="https://storage.googleapis.com/apiary_public/nectar_network_homepage.png" width="600">
+
+*****Note:*** It is important to clear the ports and/or restart the container before successfully compiling Apiary; do this in the case that you run into any errors during the compiling process. When running the network after the setup, you can simply run ```mvn spring-boot:run``` without cleaning or packaging.
