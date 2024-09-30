@@ -168,3 +168,61 @@ Then, navigate to `localhost:8081` to view this new social network! You should s
 <img src="https://storage.googleapis.com/apiary_public/nectar_network_homepage.png" width="600">
 
 *****Note:*** It is important to clear the ports and/or restart the container before successfully compiling Apiary; do this in the case that you run into any errors during the compiling process. When running the network after the setup, you can simply run ```mvn spring-boot:run``` without cleaning or packaging.
+
+
+### Examine Postgres database
+
+1. Check Docker connection accessible by:
+    
+    ```shell
+    docker ps
+    ```
+
+    You may see something like:
+    ```shell
+    CONTAINER ID   IMAGE                    COMMAND                  CREATED      STATUS      PORTS                    NAMES
+    eceb89fb82f9   postgres:14.5-bullseye   "docker-entrypoint.s…"   4 days ago   Up 4 days   0.0.0.0:5432->5432/tcp   apiary-postgres
+    ```
+
+    With this verified, we can continue to connect to Postgres.
+
+2. Connect to Postgres
+
+    ```shell
+    docker exec -it <container_id> psql -U postgres
+    ```
+
+    By so, we are connected to Postgres and can key in cmd in terminal to examine databases.
+
+3. Frequently Used Commands
+
+    **List all databases**
+   
+    ```sql
+    \l
+    ```
+
+    **Switch to the Desired Database**
+
+   ```sql
+   \c <your_desired_db_name>
+   ```
+
+   **List All Tables in the Database**
+
+   ```sql
+   \dt
+   ```
+
+   **View Data in a Table**
+
+   ```sql
+    SELECT * FROM <table_name>;
+   ```
+
+   **Exit the ```psql``` Client**
+   ```sql
+   \q
+   ```
+
+   **More references:** [psql command line tutorial and cheat sheet](https://tomcam.github.io/postgres/).
