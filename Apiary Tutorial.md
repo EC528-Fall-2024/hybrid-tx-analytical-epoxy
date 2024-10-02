@@ -98,6 +98,9 @@ For Windows:
 
 
 ### Run the Postgres Demo Website
+Make sure that you are in the postgrades folder by 
+
+        cd postgres-demo
 
 To run the postgres-demo website, follow these steps:
 
