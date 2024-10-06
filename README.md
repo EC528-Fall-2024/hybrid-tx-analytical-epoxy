@@ -167,10 +167,10 @@ Stretch Goals:
 
 ### Sprints:
 
-Sprint 1. Find datasets and implement Epoxy `<br>`
+Sprint 1. Find datasets and implement Epoxy <br>
 [Sprint video](https://youtu.be/DFNJatZPwU4) | [Sprint slides](https://docs.google.com/presentation/d/17updjwpJJet0NcEK1xSxx1LHyAb83xCzIRcUtQwE-CQ/edit?usp=sharing)
 
-Sprint 2. Add the two databases onto the Epoxy layer, and add dataset in the OLTP
+Sprint 2. Add the two databases onto the Epoxy layer, and add dataset in the OLTP <br>
 [Sprint video](https://www.youtube.com/watch?v=xwD-pXaUsdU) | [Sprint slides](https://docs.google.com/presentation/d/19ie7AyahpwhMFPn3A1KhOjO3vDkOWZsVh58izebvY8w/edit?usp=sharing)
 
 Sprint 3. Implement ETL
