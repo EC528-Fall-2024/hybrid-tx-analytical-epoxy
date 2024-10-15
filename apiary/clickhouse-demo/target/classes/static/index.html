@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ClickHouse OLAP Demo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        h1, h2 {
+            color: #333;
+        }
+        button {
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+        }
+        #result, #insertForm {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        input[type="text"], input[type="number"], input[type="date"] {
+            width: 100%;
+            padding: 8px;
+            margin: 5px 0;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+<body>
+    <h1>ClickHouse OLAP Demo</h1>
+    
+    <h2>Insert Data</h2>
+    <div id="insertForm">
+        <input type="date" id="date" required>
+        <input type="text" id="product" placeholder="Product" required>
+        <input type="text" id="category" placeholder="Category" required>
+        <input type="number" id="quantity" placeholder="Quantity" required>
+        <input type="number" id="revenue" placeholder="Revenue" step="0.01" required>
+        <button onclick="insertData()">Insert Data</button>
+    </div>
+
+    <h2>Analyze Data</h2>
+    <button onclick="getAverages()">Get Averages</button>
+    <button onclick="getRevenueContribution()">Get Revenue Contribution</button>
+    <div id="result"></div>
+
+    <script src="script.js"></script>
+</body>
+</html>
