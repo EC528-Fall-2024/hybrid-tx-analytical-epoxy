@@ -19,7 +19,8 @@ import org.springframework.web.bind.support.SessionStatus;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
 
-import org.dbos.apiary.postgresdemo.etl.ETLService;
+import org.dbos.apiary.postgresdemo.etl.ETLService; // ETL
+import org.dbos.apiary.postgresdemo.clickhouse.ClickHouseService; // Clickhouse demo
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -173,6 +174,67 @@ public class NectarController {
             // Handle error and return failure message
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error occurred during ETL process");
+        }
+    }
+
+    // Clickhouse
+    // Inject the ClickHouseService into the controller
+    @Autowired
+    private ClickHouseService clickHouseService;
+
+
+    @GetMapping("/select-tables")
+    public String selectTablesPage() {
+        return "select_tables"; // This should match the HTML filename without the .html extension
+    }
+
+    @GetMapping("/view-table")
+    public String viewTablePage() {
+        return "view_table"; // This should match the HTML filename without the .html extension
+    }
+
+    // This endpoint is called to populate databases
+    @GetMapping(value = "/get-databases", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<String>> fetchDB() {
+        try {
+            // Get the list of databases
+            List<String> databases = clickHouseService.getDatabases();
+            // Return the list of databases
+            return ResponseEntity.ok(databases);
+        } catch (Exception e) {
+            // Handle error and return failure message
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    // This endpoint fetches tables for a specific database
+    @GetMapping(value = "/get-tables", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<String>> fetchTables(@RequestParam String database) {
+        try {
+            // Get the list of tables for the specified database
+            List<String> tables = clickHouseService.getTables(database);
+            // Return the list of tables
+            return ResponseEntity.ok(tables);
+        } catch (Exception e) {
+            // Handle error and return failure message
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    // This endpoint fetches contents of a specific table
+    @GetMapping(value = "/get-table-contents", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<String>> fetchTableContents(@RequestParam String database, @RequestParam String table) {
+        try {
+            // Get the contents of the specified table
+            List<String> tableContents = clickHouseService.getTableContents(database, table);
+            // Return the list of contents
+            return ResponseEntity.ok(tableContents);
+        } catch (Exception e) {
+            // Handle error and return failure message
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 }
