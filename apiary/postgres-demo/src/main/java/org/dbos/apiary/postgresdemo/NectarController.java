@@ -19,6 +19,12 @@ import org.springframework.web.bind.support.SessionStatus;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
 
+import org.dbos.apiary.postgresdemo.etl.ETLService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
+
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.sql.SQLException;
@@ -144,5 +150,29 @@ public class NectarController {
     @ModelAttribute("logincredentials")
     public Credentials logincredentials() {
         return new Credentials();
+    }
+
+    @Autowired
+    private ETLService etlService;
+
+    // Connect to etl.html file
+    @GetMapping("/etl")
+    public String etlPage() {
+        return "etl";  
+    }
+
+    // This endpoint is called when the ETL button is clicked
+    @GetMapping(value = "/start-etl", produces = MediaType.TEXT_PLAIN_VALUE)
+    public ResponseEntity<String> startETLProcess() {
+        try {
+            // Start the ETL process
+            etlService.runETL();
+            // Return success message
+            return ResponseEntity.status(HttpStatus.OK).body("ETL completed!");
+        } catch (Exception e) {
+            // Handle error and return failure message
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error occurred during ETL process");
+        }
     }
 }
