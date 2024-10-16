@@ -156,3 +156,6 @@ If this doesn't work, you may need to repackage:
 
 Then, navigate to `localhost:8080` to view this new social network! You should see the Nectar homepage:
 <img src='app_screenshot.png' width="600">
+
+And this is an example of the revenue contribution of randomly inserted data:
+<img src='app_screenshot_revenue_contribution.png' width="600">
