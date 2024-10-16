@@ -26,13 +26,13 @@ public class ClickHouseService {
 
     public void createTableIfNotExists() throws SQLException {
         String sql = "CREATE TABLE IF NOT EXISTS sales (" +
-                     "date Date, " +
-                     "product String, " +
-                     "category String, " +
-                     "quantity Int32, " +
-                     "revenue Float64" +
-                     ") ENGINE = MergeTree() " +
-                     "ORDER BY (date, product)";
+                    "date Date, " +
+                    "product String, " +
+                    "category String, " +
+                    "quantity Int32, " +
+                    "revenue Float64" +
+                    ") ENGINE = MergeTree() " +
+                    "ORDER BY (date, product)";
         try (Connection conn = dataSource.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.execute();
@@ -43,12 +43,13 @@ public class ClickHouseService {
         String sql = "INSERT INTO sales (date, product, category, quantity, revenue) VALUES (?, ?, ?, ?, ?)";
         try (Connection conn = dataSource.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setString(1, date);
+            stmt.setDate(1, java.sql.Date.valueOf(date));
             stmt.setString(2, product);
             stmt.setString(3, category);
             stmt.setInt(4, quantity);
             stmt.setDouble(5, revenue);
-            stmt.executeUpdate();
+            stmt.addBatch();
+            stmt.executeBatch();
         }
     }
 

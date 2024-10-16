@@ -27,6 +27,7 @@ public class SalesController {
     @PostMapping("/insert")
     public ResponseEntity<String> insertData(@RequestBody Map<String, Object> data) {
         try {
+            clickHouseService.createTableIfNotExists();
             clickHouseService.insertData(
                 (String) data.get("date"),
                 (String) data.get("product"),
