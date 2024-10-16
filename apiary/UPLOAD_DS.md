@@ -1,5 +1,6 @@
 # OLTP (Postgres)
 ## Upload existing database to postgres
+**Example CSV file: [campaign_product_subcategory.csv](https://www.kaggle.com/datasets/sharangkulkarni/oltp-ecommerce-data)**
 
 1. Dentify the PostgreSQL Container ID
     ```shell
@@ -18,26 +19,27 @@
 
 4. Create a new database for your dataset
     ```sql
-    CREATE DATABASE <your_database_name>;
+    CREATE DATABASE campaign_product_subcategory;
     ```
-    Switch to your dataset: 
+    Switch to your database: 
     ```sql
-    \c <your_database_name>
+    \c campaign_product_subcategory
     ```
 
 5. Create a Table for the CSV Data
     Based on your CSV file, we need to create a table that matches its structure. 
     ```sql
-    CREATE TABLE <your_database_name> (
-    <column_1> <type_1>,
-    <column_2> <type_2> ,
-    ...
+    CREATE TABLE campaign_product_subcategory (
+        campaign_product_subcategory_id INT PRIMARY KEY,
+        campaign_id INT,
+        subcategory_id INT,
+        discount FLOAT
     );
     ```
 
 6. Import the CSV Data into the Table
     ```sql
-    COPY <your_database_name>(<column_1>, <column_2>, ...)
+    COPY campaign_product_subcategory(campaign_product_subcategory_id, campaign_id, subcategory_id, discount)
     FROM '/<your_csv>.csv'
     DELIMITER ','
     CSV HEADER;
@@ -50,11 +52,11 @@
     
 7. Verify the Data Upload
     ```sql
-    SELECT * FROM <your_database_name> LIMIT 10;
+    SELECT * FROM campaign_product_subcategory LIMIT 10;
     ``` 
 
 # OLAP (ClickHouse)
-**Example file: granolaProductDataset.csv**
+**Example CSV file: [granolaProductDataset.csv](https://www.kaggle.com/datasets/fahimemir/granolaproductdataset)**
 
 ## Upload existing database to clickhouse
 1. Dentify the ClickHouse Container ID
@@ -76,7 +78,7 @@
     ```sql
     CREATE DATABASE granolaProduct;
     ```
-    Switch to your dataset: 
+    Switch to your database: 
     ```sql
     USE granolaProduct;
     ```
