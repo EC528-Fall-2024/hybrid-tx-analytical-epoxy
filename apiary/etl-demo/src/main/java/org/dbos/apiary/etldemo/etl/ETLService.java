@@ -3,6 +3,8 @@ package org.dbos.apiary.etldemo.etl;
 import org.springframework.stereotype.Service;
 
 import java.sql.ResultSet;
+import java.util.List;
+import java.util.Map;
 
 @Service
 public class ETLService {
@@ -14,8 +16,11 @@ public class ETLService {
             // Step 1: Extract data from PostgreSQL
             resultSet = ExtractFromPostgres.extractData();
 
-            // Step 2: Load the data into ClickHouse
-            LoadToClickHouse.loadData(resultSet);
+            // Step 2: Transform data from column-based to row-based
+            List<Map<String, List<Object>>> transformedData = TransformService.transformColumnToRow(resultSet);
+
+            // Step 3: Load the transformed data into ClickHouse
+            LoadToClickHouse.loadData(transformedData);
 
         } catch (Exception e) {
             e.printStackTrace();
