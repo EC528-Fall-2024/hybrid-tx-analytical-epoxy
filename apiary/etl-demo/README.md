@@ -48,6 +48,7 @@ The ETL process will perform a **full load** for data from Postgre to ClickHouse
 
 - `ExtractFromPostgres.java`: Extracts the data from PostgreSQL into a ResultSet.
 - `LoadToClickHouse.java`: Loads the extracted data from PostgreSQL into ClickHouse.
+-  `TransformService` : Transforms the data from column based to row base.
 - `ETLService.java`: Orchestrates the ETL process and ensures the data is moved smoothly.
 
 Let's take a closer look at these functions.
