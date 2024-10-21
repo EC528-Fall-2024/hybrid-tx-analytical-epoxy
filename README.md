@@ -173,7 +173,8 @@ Sprint 1. Find datasets and implement Epoxy <br>
 Sprint 2. Add the two databases onto the Epoxy layer, and add dataset in the OLTP <br>
 [Sprint video](https://www.youtube.com/watch?v=xwD-pXaUsdU) | [Sprint slides](https://docs.google.com/presentation/d/19ie7AyahpwhMFPn3A1KhOjO3vDkOWZsVh58izebvY8w/edit?usp=sharing)
 
-Sprint 3. Implement ETL
+Sprint 3. Implement ETL <br>
+[Sprint video](https://www.youtube.com/watch?v=i8_xEcuMeO4) | [Sprint slides](https://docs.google.com/presentation/d/1JaS7F-uORPoyf4aQPv05HhkPrSkrDUldQeUTgYz-IpQ/edit?usp=sharing)
 
 Sprint 4. Benchmark against similar ETL implementations
 
