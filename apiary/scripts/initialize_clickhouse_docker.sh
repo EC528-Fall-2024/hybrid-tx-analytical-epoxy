@@ -16,13 +16,22 @@ docker run -d --rm -p 9000:9000 -p 8123:8123 \
 # Wait until ClickHouse is ready
 MAX_TRY=30
 cnt=0
-while [[ -z "${ready}" ]]; do
-  docker logs clickhouse_server | grep -q "Ready for connections" && ready="ready"
-  cnt=$[$cnt+1]
+while true; do
+  # Check if the ClickHouse process is running
+  if docker top clickhouse_server &>/dev/null; then
+    # Check if ClickHouse is accepting connections
+    if docker exec clickhouse_server clickhouse-client --query "SELECT 1" &>/dev/null; then
+      echo "ClickHouse is ready for connections"
+      break
+    fi
+  fi
+
+  cnt=$((cnt+1))
   if [[ $cnt -eq ${MAX_TRY} ]]; then
     echo "Wait timed out. ClickHouse failed to start."
     exit 1
   fi
+  echo "Waiting for ClickHouse to be ready... (Attempt $cnt/$MAX_TRY)"
   sleep 5 # avoid busy loop
 done
 
