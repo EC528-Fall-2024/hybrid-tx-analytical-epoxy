@@ -93,6 +93,7 @@
                     throw new Error('Network response was not ok');
                 }
                 const contents = await response.json();
+                console.log(contents)
                 const list = document.getElementById('contentsList');
                 list.innerHTML = ''; // Clear previous contents
                 contents.forEach(content => {
