@@ -4,7 +4,7 @@ This tutorial will show you how to build a simple social network
 web application using Apiary and [Spring Boot](https://spring.io/projects/spring-boot) for ETL process.
 We use Apiary's Postgres (for OLTP) and ClickHouse (for OLAP) as backends.
 
-<span style="color:red">**Note**</span>: This is currently an incomplete version of ETL, since there is **NO** transform proccess, only extract and load. This will be fixed in the next itertion.
+
 
 
 To get started, let's first install some dependencies:
@@ -48,6 +48,7 @@ The ETL process will perform a **full load** for data from Postgre to ClickHouse
 
 - `ExtractFromPostgres.java`: Extracts the data from PostgreSQL into a ResultSet.
 - `LoadToClickHouse.java`: Loads the extracted data from PostgreSQL into ClickHouse.
+-  `TransformService` : Transforms the data from column based to row base.
 - `ETLService.java`: Orchestrates the ETL process and ensures the data is moved smoothly.
 
 Let's take a closer look at these functions.
@@ -177,7 +178,7 @@ Everything's ready!  To start the site, run in the `etl-demo` root directory:
 mvn clean && mvn package && mvn spring-boot:run
 ```
 
-Then, navigate to `localhost:8080` to view this new social network! You should see the Nectar homepage:
+Then, navigate to `localhost:8081` to view this new social network! You should see the Nectar homepage:
 <img src='app_screenshot.jpg' width="600">
 
 We can start ETL process by clicking on the button.

@@ -4,6 +4,36 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ETL Process</title>
+    <style>
+        body {
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+        .center-container {
+            text-align: center;
+        }
+        .button-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px; /* Spacing between buttons */
+            margin-top: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        #notification {
+            margin-top: 20px;
+            font-size: 18px;
+            color: #333;
+        }
+    </style>
     <script>
         function startETL() {
             // Call the ETL endpoint via a fetch request
@@ -18,13 +48,20 @@
                     document.getElementById('notification').innerText = 'Error: ' + error;
                 });
         }
+        function startOLAP(){
+             window.location.href = 'olap';
+        }
     </script>
 </head>
 <body>
-    <h1>Trigger ETL Process</h1>
-    <button onclick="startETL()">Start ETL</button>
-
-    <!-- Notification area to display success or error message -->
-    <p id="notification"></p>
+    <div class="center-container">
+        <h1>Trigger ETL Process</h1>
+        <div class="button-container">
+            <button onclick="startETL()">Start ETL</button>
+             <button onclick="startOLAP()">OLAP Database</button>
+        </div>
+        <!-- Notification area to display success or error message -->
+        <p id="notification"></p>
+    </div>
 </body>
 </html>
