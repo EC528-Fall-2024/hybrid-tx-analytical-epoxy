@@ -48,6 +48,9 @@
                     document.getElementById('notification').innerText = 'Error: ' + error;
                 });
         }
+        function startOLAP(){
+             window.location.href = 'olap.html';
+        }
     </script>
 </head>
 <body>
@@ -55,6 +58,7 @@
         <h1>Trigger ETL Process</h1>
         <div class="button-container">
             <button onclick="startETL()">Start ETL</button>
+             <button onclick="startOLAP()">OLAP Database</button>
         </div>
         <!-- Notification area to display success or error message -->
         <p id="notification"></p>
