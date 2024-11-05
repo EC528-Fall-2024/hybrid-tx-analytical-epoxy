@@ -1,8 +1,8 @@
-/Users/jason/Documents/Schoolwork/Fall_2024/EC528/hybrid-tx-analytical-epoxy/apiary/etl-demo/src/main/java/org/dbos/apiary/etldemo/etl/LoadToClickHouse.java
-/Users/jason/Documents/Schoolwork/Fall_2024/EC528/hybrid-tx-analytical-epoxy/apiary/etl-demo/src/main/java/org/dbos/apiary/etldemo/etl/ETLService.java
-/Users/jason/Documents/Schoolwork/Fall_2024/EC528/hybrid-tx-analytical-epoxy/apiary/etl-demo/src/main/java/org/dbos/apiary/etldemo/clickhouse/ClickHouseConnection.java
-/Users/jason/Documents/Schoolwork/Fall_2024/EC528/hybrid-tx-analytical-epoxy/apiary/etl-demo/src/main/java/org/dbos/apiary/etldemo/ETLDemoApplication.java
-/Users/jason/Documents/Schoolwork/Fall_2024/EC528/hybrid-tx-analytical-epoxy/apiary/etl-demo/src/main/java/org/dbos/apiary/etldemo/controller/ETLController.java
-/Users/jason/Documents/Schoolwork/Fall_2024/EC528/hybrid-tx-analytical-epoxy/apiary/etl-demo/src/main/java/org/dbos/apiary/etldemo/etl/ExtractFromPostgres.java
-/Users/jason/Documents/Schoolwork/Fall_2024/EC528/hybrid-tx-analytical-epoxy/apiary/etl-demo/src/main/java/org/dbos/apiary/etldemo/clickhouse/ClickHouseService.java
-/Users/jason/Documents/Schoolwork/Fall_2024/EC528/hybrid-tx-analytical-epoxy/apiary/etl-demo/src/main/java/org/dbos/apiary/etldemo/etl/TransformService.java
+C:\Users\lukas\fall_2024\EC528\hybrid-tx-analytical-epoxy\apiary\etl-demo\src\main\java\org\dbos\apiary\etldemo\clickhouse\ClickHouseService.java
+C:\Users\lukas\fall_2024\EC528\hybrid-tx-analytical-epoxy\apiary\etl-demo\src\main\java\org\dbos\apiary\etldemo\controller\ETLController.java
+C:\Users\lukas\fall_2024\EC528\hybrid-tx-analytical-epoxy\apiary\etl-demo\src\main\java\org\dbos\apiary\etldemo\etl\TransformService.java
+C:\Users\lukas\fall_2024\EC528\hybrid-tx-analytical-epoxy\apiary\etl-demo\src\main\java\org\dbos\apiary\etldemo\etl\ETLService.java
+C:\Users\lukas\fall_2024\EC528\hybrid-tx-analytical-epoxy\apiary\etl-demo\src\main\java\org\dbos\apiary\etldemo\etl\LoadToClickHouse.java
+C:\Users\lukas\fall_2024\EC528\hybrid-tx-analytical-epoxy\apiary\etl-demo\src\main\java\org\dbos\apiary\etldemo\etl\ExtractFromPostgres.java
+C:\Users\lukas\fall_2024\EC528\hybrid-tx-analytical-epoxy\apiary\etl-demo\src\main\java\org\dbos\apiary\etldemo\clickhouse\ClickHouseConnection.java
+C:\Users\lukas\fall_2024\EC528\hybrid-tx-analytical-epoxy\apiary\etl-demo\src\main\java\org\dbos\apiary\etldemo\ETLDemoApplication.java
