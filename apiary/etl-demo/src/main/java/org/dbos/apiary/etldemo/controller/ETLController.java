@@ -6,13 +6,17 @@ import org.springframework.http.MediaType;
 import org.dbos.apiary.etldemo.etl.ETLService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+// import org.springframework.web.bind.annotation.RequestMapping;
+// import org.springframework.web.bind.annotation.RestController;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
 
 import org.dbos.apiary.etldemo.clickhouse.ClickHouseService; // Clickhouse demo
 import java.util.List;
+import java.util.Map;
+
 import org.springframework.web.bind.annotation.RequestParam;
 
 
@@ -30,11 +34,19 @@ public class ETLController {
     }
 
     // This endpoint is called when the ETL button is clicked
-    @GetMapping(value = "/start-etl", produces = MediaType.TEXT_PLAIN_VALUE)
-    public ResponseEntity<String> startETLProcess() {
+    //@GetMapping(value = "/start-etl", produces = MediaType.TEXT_PLAIN_VALUE)
+    @PostMapping(value = "/start-etl", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.TEXT_PLAIN_VALUE)
+    public ResponseEntity<String> startETLProcess(@RequestBody Map<String, String> request) {
         try {
+            String postgresUrl = request.get("postgresUrl");
+            String postgresUser = request.get("postgresUser");
+            String postgresPassword = request.get("postgresPassword");
+            String clickhouseUrl = request.get("clickhouseUrl");
+            String clickhouseUser = request.get("clickhouseUser");
+            String clickhousePassword = request.get("clickhousePassword");
+
             // Start the ETL process
-            etlService.runETL();
+            etlService.runETL(postgresUrl, postgresUser, postgresPassword, clickhouseUrl, clickhouseUser, clickhousePassword);
             // Return success message
             return ResponseEntity.status(HttpStatus.OK).body("ETL completed!");
         } catch (Exception e) {

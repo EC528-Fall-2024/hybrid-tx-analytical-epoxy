@@ -3,12 +3,15 @@ package org.dbos.apiary.etldemo.etl;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
-import java.sql.SQLException;
+// import java.sql.SQLException;
 import java.sql.Statement;
 
 public class ExtractFromPostgres {
 
     public static ResultSet extractData(String postgresUrl, String postgresUser, String postgresPassword) {
+        Connection connection = null;
+        Statement statement = null;
+        ResultSet resultSet = null;
         
         try {
             // Connect to PostgreSQL
