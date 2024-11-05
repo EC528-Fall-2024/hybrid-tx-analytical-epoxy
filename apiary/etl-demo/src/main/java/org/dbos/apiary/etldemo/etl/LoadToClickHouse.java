@@ -112,12 +112,13 @@ public class LoadToClickHouse {
                         clickhouseStmt.setObject(i + 1, values.get(i)); // Generalized to handle any data type
                     }
 
-                    clickhouseStmt.addBatch(); // Add to batch for efficiency
+                    // clickhouseStmt.addBatch(); // Add to batch for efficiency 
+                    clickhouseStmt.executeUpdate();
                 }
             }
 
             // Step 4: Execute the batch
-            clickhouseStmt.executeBatch();
+            // clickhouseStmt.executeBatch();
             System.out.println("Data successfully inserted into ClickHouse.");
 
         } catch (SQLException e) {
