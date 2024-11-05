@@ -182,3 +182,12 @@ Then, navigate to `localhost:8081` to view this new social network! You should s
 <img src='app_screenshot.jpg' width="600">
 
 We can start ETL process by clicking on the button.
+
+### Example parameters
+
+- OLTP Database URL: `jdbc:postgresql://localhost:5432/campaign_product_subcategory`
+- OLTP Username: `postgres`
+- OLTP Password: `dbos`
+- OLAP Database URL: `jdbc:clickhouse://localhost:8123`
+- OLAP Username: `default`
+- OLAP Password: (left empty)
