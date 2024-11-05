@@ -13,6 +13,22 @@ import java.util.Map;
 
 public class LoadToClickHouse {
 
+    // Helper function returning SQL command for creating desired table
+    public static StringBuilder generateFeatures(int rowCount, String databaseName) {
+        // Start building the SQL query
+        StringBuilder generatedFeatures = new StringBuilder();
+
+        // Dynamically add 'row_i' columns based on the number of rows
+        for (int i = 1; i <= rowCount; i++) {
+            generatedFeatures.append("row_").append(i).append(" String, ");
+        }
+    
+        // Remove the trailing comma and space
+        generatedFeatures.setLength(generatedFeatures.length() - 2);
+        
+        return generatedFeatures;
+    }
+
     // ClickHouse connection parameters
     private static final String CLICKHOUSE_URL = "jdbc:clickhouse://localhost:8123";
     private static final String CLICKHOUSE_USER = "default";
@@ -32,80 +48,85 @@ public class LoadToClickHouse {
                     statement = clickhouseConn.createStatement();
                 } else {
                     System.err.println("ClickHouse connection is null!");
+                    return;
                 }
             } catch (SQLException e) {
                 System.err.println("Failed to connect to ClickHouse: " + e.getMessage());
                 e.printStackTrace();
+                return;
             }
 
             // Step 2: Check if the ClickHouse database exists, if not, create it
-            String databaseName = "campaign_product_subcategory"; // Name of OLAP database
+            String databaseName = System.getenv("campaign_product_subcategory");
+            if (databaseName == null || databaseName.isEmpty()) {
+                System.err.println("Database name is not provided!");
+                databaseName = "campaign_product_subcategory";
+                // return;
+            }
             statement.executeUpdate("CREATE DATABASE IF NOT EXISTS " + databaseName);
-            System.out.println("Database checked/created: " + databaseName);
 
-            // Step 3: Check if the table exists, if not, create it
-            // String createTableSQL = "CREATE TABLE IF NOT EXISTS " + databaseName + ".campaign_product_subcategory (" +
-            //         "campaign_product_subcategory_id UInt32, " +
-            //         "campaign_id UInt32, " +
-            //         "subcategory_id UInt32, " +
-            //         "discount Float32" +
-            //         ") ENGINE = MergeTree() ORDER BY campaign_product_subcategory_id";
-            // statement.executeUpdate(createTableSQL);
-            String createTableSQL = "CREATE TABLE IF NOT EXISTS " + databaseName + ".campaign_product_subcategory (" +
-                    "column_name String, " +   // The column name (e.g., "campaign_id")
-                    "value_1 String, " +      // The first value in the column
-                    "value_2 String, " +      // The second value in the column
-                    "value_3 String " +       // The third value in the column
-                    ") ENGINE = MergeTree() ORDER BY column_name";
-            statement.executeUpdate(createTableSQL);
-            System.out.println("Table checked/created: campaign_product_subcategory");
+            // Create table if not exist
+            StringBuilder createTableSQL = new StringBuilder(
+                "CREATE TABLE IF NOT EXISTS " + databaseName + ".campaign_product_subcategory ("
+                + "feature_name String, ");
+            // Generate feature SQL command
+            StringBuilder generatedFeaturesSQL = generateFeatures(transformedData.get(0).entrySet().iterator().next().getValue().size(), databaseName);
+            // Complete the SQL query with the ClickHouse engine configuration
+            createTableSQL.append(generatedFeaturesSQL);
+            createTableSQL.append(") ENGINE = MergeTree() ORDER BY feature_name");
+            statement.executeUpdate(createTableSQL.toString());
+            
+            System.out.println("Database, table checked/created: " + databaseName);
 
-            // Step 4: Prepare the insert SQL for ClickHouse
-            String insertSQL = "INSERT INTO " + databaseName + ".campaign_product_subcategory " +
-                    // "(campaign_product_subcategory_id, campaign_id, subcategory_id, discount) " +
-                    // "VALUES (?, ?, ?, ?)";
-                    "(column_name, value_1, value_2, value_3)" + 
-                    "VALUES (?, ?, ?, ?)";
-            clickhouseStmt = clickhouseConn.prepareStatement(insertSQL);
-
-            // // Step 5: Loop through the PostgreSQL result set and insert the data into ClickHouse
-            // while (resultSet.next()) {
-            //     clickhouseStmt.setInt(1, resultSet.getInt("campaign_product_subcategory_id"));
-            //     clickhouseStmt.setInt(2, resultSet.getInt("campaign_id"));
-            //     clickhouseStmt.setInt(3, resultSet.getInt("subcategory_id"));
-            //     clickhouseStmt.setFloat(4, resultSet.getFloat("discount"));
-
-            //     clickhouseStmt.addBatch(); // Add to batch for efficiency
-            // }
-            // Step 5: Loop through the transformed data and insert it into ClickHouse
+            // Step 3: Process the transformed data
             for (Map<String, List<Object>> row : transformedData) {
                 for (Map.Entry<String, List<Object>> entry : row.entrySet()) {
                     String columnName = entry.getKey();
                     List<Object> values = entry.getValue();
 
-                    // Set the values in the prepared statement (assuming there are 3 values for each column)
-                    clickhouseStmt.setString(1, columnName);
-                    clickhouseStmt.setString(2, values.size() > 0 ? values.get(0).toString() : null);
-                    clickhouseStmt.setString(3, values.size() > 1 ? values.get(1).toString() : null);
-                    clickhouseStmt.setString(4, values.size() > 2 ? values.get(2).toString() : null);
+                    // Dynamically construct a SQL insert statement based on the number of values
+                    StringBuilder placeholders = new StringBuilder();
+                    for (int i = 0; i < values.size(); i++) {
+                        placeholders.append("?,");
+                    }
+                    // Remove trailing comma
+                    if (placeholders.length() > 0) {
+                        placeholders.deleteCharAt(placeholders.length() - 1);
+                    }
+
+                    // String insertSQL = "INSERT INTO " + databaseName + ".campaign_product_subcategory (feature_name, " 
+                    //         + generatedFeaturesSQL.toString().replace(" String", "") 
+                    //         + ") VALUES (" + columnName + "," + placeholders.toString() + ")";
+                    
+                    String insertSQL = "INSERT INTO " + databaseName + ".campaign_product_subcategory (feature_name, " 
+                            + generatedFeaturesSQL.toString().replace(" String", "") 
+                            + ") VALUES ('" + columnName + "', " + placeholders.toString() + ")";
+
+                    // System.out.println(insertSQL);
+                    clickhouseStmt = clickhouseConn.prepareStatement(insertSQL);
+
+                    // Dynamically set the values in the prepared statement
+                    for (int i = 0; i < values.size(); i++) {
+                        clickhouseStmt.setObject(i + 1, values.get(i)); // Generalized to handle any data type
+                    }
 
                     clickhouseStmt.addBatch(); // Add to batch for efficiency
                 }
             }
 
-            // Execute the batch insert
+            // Step 4: Execute the batch
             clickhouseStmt.executeBatch();
-            System.out.println("Data successfully loaded into ClickHouse!");
+            System.out.println("Data successfully inserted into ClickHouse.");
 
-        } catch (Exception e) {
+        } catch (SQLException e) {
             e.printStackTrace();
         } finally {
-            // Close connections and statements
+            // Close the connections and statements
             try {
                 if (clickhouseStmt != null) clickhouseStmt.close();
                 if (statement != null) statement.close();
                 if (clickhouseConn != null) clickhouseConn.close();
-            } catch (Exception e) {
+            } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
