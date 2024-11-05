@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ETL Process</title>
+    <script>
+        function startETL() {
+            // Call the ETL endpoint via a fetch request
+            fetch('/start-etl')
+                .then(response => response.text())
+                .then(message => {
+                    // Display the result message in the notification area
+                    document.getElementById('notification').innerText = message;
+                })
+                .catch(error => {
+                    // Display the error message
+                    document.getElementById('notification').innerText = 'Error: ' + error;
+                });
+        }
+    </script>
+</head>
+<body>
+    <h1>Trigger ETL Process</h1>
+    <button onclick="startETL()">Start ETL</button>
+
+    <!-- Notification area to display success or error message -->
+    <p id="notification"></p>
+</body>
+</html>

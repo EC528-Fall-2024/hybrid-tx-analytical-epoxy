@@ -9,10 +9,6 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-import java.sql.ResultSetMetaData;
-import java.util.HashMap;
-import java.util.Map;
-
 @Service
 public class ClickHouseService {
 
@@ -53,24 +49,13 @@ public class ClickHouseService {
     }
 
     // Method to fetch contents of a specific table
-    public List<Map<String, Object>> getTableContents(String database, String table) {
-        List<Map<String, Object>> tableContents = new ArrayList<>();
+    public List<String> getTableContents(String database, String table) {
+        List<String> tableContents = new ArrayList<>();
         try (Connection connection = clickHouseConnection.getClickHouseConnection();
              Statement statement = connection.createStatement();
              ResultSet resultSet = statement.executeQuery("SELECT * FROM " + database + "." + table + " LIMIT 10")) {
-            
-            // Get metadata to fetch column names
-            ResultSetMetaData metaData = resultSet.getMetaData();
-            int columnCount = metaData.getColumnCount();
-    
             while (resultSet.next()) {
-                Map<String, Object> row = new HashMap<>();
-                for (int i = 1; i <= columnCount; i++) {
-                    String columnName = metaData.getColumnName(i);
-                    Object value = resultSet.getObject(i);  // Get value as Object to handle various types
-                    row.put(columnName, value);  // Add column name and value to the row
-                }
-                tableContents.add(row);  // Add the row (as a dictionary) to the list
+                tableContents.add(resultSet.getString(1));  // Customize based on your table structure
             }
         } catch (Exception e) {
             e.printStackTrace();

@@ -5,12 +5,9 @@ import org.springframework.stereotype.Service;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
 
 @Service
 public class ClickHouseService {
@@ -25,8 +22,8 @@ public class ClickHouseService {
     public List<String> getDatabases() {
         List<String> databases = new ArrayList<>();
         try (Connection connection = clickHouseConnection.getClickHouseConnection();
-            Statement statement = connection.createStatement();
-            ResultSet resultSet = statement.executeQuery("SHOW DATABASES")) {
+             Statement statement = connection.createStatement();
+             ResultSet resultSet = statement.executeQuery("SHOW DATABASES")) {
             while (resultSet.next()) {
                 databases.add(resultSet.getString(1));
             }
@@ -40,8 +37,8 @@ public class ClickHouseService {
     public List<String> getTables(String database) {
         List<String> tables = new ArrayList<>();
         try (Connection connection = clickHouseConnection.getClickHouseConnection();
-            Statement statement = connection.createStatement();
-            ResultSet resultSet = statement.executeQuery("SHOW TABLES FROM " + database)) {
+             Statement statement = connection.createStatement();
+             ResultSet resultSet = statement.executeQuery("SHOW TABLES FROM " + database)) {
             while (resultSet.next()) {
                 tables.add(resultSet.getString(1));
             }
@@ -52,40 +49,17 @@ public class ClickHouseService {
     }
 
     // Method to fetch contents of a specific table
-    public Map<String, List<String>> getTableContents(String database, String table) {
-        Map<String, List<String>> tableContents = new HashMap<>();
-    
+    public List<String> getTableContents(String database, String table) {
+        List<String> tableContents = new ArrayList<>();
         try (Connection connection = clickHouseConnection.getClickHouseConnection();
-            Statement statement = connection.createStatement();
-            ResultSet resultSet = statement.executeQuery("SELECT * FROM " + database + "." + table + " LIMIT 10")) {
-    
-            ResultSetMetaData metaData = resultSet.getMetaData();
-            int columnCount = metaData.getColumnCount();
-    
-            // Initialize the map with column names as keys and empty lists as values
-            for (int i = 1; i <= columnCount; i++) {
-                String columnName = metaData.getColumnName(i);
-                tableContents.put(columnName, new ArrayList<>());
-            }
-    
-            // Loop through each row in the ResultSet
+             Statement statement = connection.createStatement();
+             ResultSet resultSet = statement.executeQuery("SELECT * FROM " + database + "." + table + " LIMIT 10")) {
             while (resultSet.next()) {
-                // Append each column value to the respective list in the map
-                for (int i = 1; i <= columnCount; i++) {
-                    String columnName = metaData.getColumnName(i);
-                    String value = resultSet.getString(i);
-    
-                    // Add the value to the corresponding column list
-                    tableContents.get(columnName).add(value);
-                }
+                tableContents.add(resultSet.getString(1));  // Customize based on your table structure
             }
-    
-            // Print the entire map for debugging
-            System.out.println("Fetched table content: " + tableContents);
-    
         } catch (Exception e) {
             e.printStackTrace();
         }
         return tableContents;
-    }    
+    }
 }

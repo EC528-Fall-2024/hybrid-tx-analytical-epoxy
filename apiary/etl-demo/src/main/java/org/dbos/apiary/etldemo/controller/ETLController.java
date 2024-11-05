@@ -13,8 +13,6 @@ import org.springframework.http.HttpStatus;
 
 import org.dbos.apiary.etldemo.clickhouse.ClickHouseService; // Clickhouse demo
 import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
 import org.springframework.web.bind.annotation.RequestParam;
 
 
@@ -88,11 +86,11 @@ public class ETLController {
 
     // This endpoint fetches contents of a specific table
     @GetMapping(value = "/get-table-contents", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Map<String, List<String>>> fetchTableContents(@RequestParam String database, @RequestParam String table) {
+    public ResponseEntity<List<String>> fetchTableContents(@RequestParam String database, @RequestParam String table) {
         try {
-            // Get the contents of the specified table as a map
-            Map<String, List<String>> tableContents = clickHouseService.getTableContents(database, table);
-            // Return the map of contents
+            // Get the contents of the specified table
+            List<String> tableContents = clickHouseService.getTableContents(database, table);
+            // Return the list of contents
             return ResponseEntity.ok(tableContents);
         } catch (Exception e) {
             // Handle error and return failure message
