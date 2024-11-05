@@ -179,7 +179,7 @@ mvn clean && mvn package && mvn spring-boot:run
 ```
 
 Then, navigate to `localhost:8081` to view this new social network! You should see the Nectar homepage:
-<img src='app_screenshot.jpg' width="600">
+<img src='app_screenshot.png' width="500">
 
 We can start ETL process by clicking on the button.
 
