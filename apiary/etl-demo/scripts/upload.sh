@@ -12,9 +12,11 @@ fi
 echo "PostgreSQL container ID: $container_id"
 
 # Step 2: Upload the CSV file to the Docker container
-csv_file="$HOME/Downloads/htap/campaign_product_subcategory.csv"  # Change this to your actual CSV file path
-echo "Uploading CSV file to the Docker container..."
-docker cp "$csv_file" "$container_id:/campaign_product_subcategory.csv"
+camp_csv_file="$HOME/Downloads/htap/campaign_product_subcategory.csv"  
+cat_csv_file="$HOME/Downloads/htap/category.csv"  
+echo "Uploading CSV files to the Docker container..."
+docker cp "$camp_csv_file" "$container_id:/campaign_product_subcategory.csv"
+docker cp "$cat_csv_file" "$container_id:/category.csv"
 
 # Step 3: Connect to PostgreSQL and execute SQL commands
 echo "Connecting to PostgreSQL and setting up the database and table..."
@@ -34,9 +36,19 @@ CREATE TABLE campaign_product_subcategory (
     discount FLOAT
 );
 
+CREATE TABLE category (
+    category_id INT PRIMARY KEY,
+    category_name VARCHAR(255) NOT NULL
+);
+
 -- Import the CSV data into the table
 COPY campaign_product_subcategory(campaign_product_subcategory_id, campaign_id, subcategory_id, discount)
 FROM '/campaign_product_subcategory.csv'
+DELIMITER ','
+CSV HEADER;
+
+COPY category(category_id, category_name)
+FROM '/category.csv'
 DELIMITER ','
 CSV HEADER;
 EOF

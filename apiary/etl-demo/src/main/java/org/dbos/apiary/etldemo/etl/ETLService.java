@@ -14,15 +14,17 @@ public class ETLService {
         ResultSet resultSet = null;
 
         try {
-            // Step 1: Extract data from PostgreSQL using provided credentials
-            resultSet = ExtractFromPostgres.extractData(postgresUrl, postgresUser, postgresPassword);
-
-            // Step 2: Transform data from column-based to row-based
-            List<Map<String, List<Object>>> transformedData = TransformService.transformColumnToRow(resultSet);
-
-            // Step 3: Load the transformed data into ClickHouse
-            LoadToClickHouse.loadData(transformedData, clickhouseUrl, clickhouseUser, clickhousePassword);
-
+            List<String> tableNames = ExtractFromPostgres.getTableNames(postgresUrl, postgresUser, postgresPassword);
+            for (String tableName : tableNames) {
+                // Step 1: Extract data from PostgreSQL using provided credentials
+                resultSet = ExtractFromPostgres.extractData(postgresUrl, postgresUser, postgresPassword, tableName);
+    
+                // Step 2: Transform data from column-based to row-based
+                List<Map<String, List<Object>>> transformedData = TransformService.transformColumnToRow(resultSet);
+    
+                // Step 3: Load the transformed data into ClickHouse
+                LoadToClickHouse.loadData(transformedData, tableName, clickhouseUrl, clickhouseUser, clickhousePassword);
+            }
         } catch (Exception e) {
             e.printStackTrace();
         } finally {

@@ -22,7 +22,7 @@ public class LoadToClickHouse {
         for (int i = 1; i <= rowCount; i++) {
             generatedFeatures.append("row_").append(i).append(" String, ");
         }
-    
+
         // Remove the trailing comma and space
         generatedFeatures.setLength(generatedFeatures.length() - 2);
         
@@ -34,7 +34,7 @@ public class LoadToClickHouse {
     // private static final String CLICKHOUSE_USER = "default";
     // private static final String CLICKHOUSE_PASSWORD = "";
 
-    public static void loadData(List<Map<String, List<Object>>> transformedData,
+    public static void loadData(List<Map<String, List<Object>>> transformedData, String table,
                                 String clickhouseUrl, String clickhouseUser, String clickhousePassword) {
         Connection clickhouseConn = null;
         PreparedStatement clickhouseStmt = null;
@@ -69,7 +69,7 @@ public class LoadToClickHouse {
 
             // Create table if not exist
             StringBuilder createTableSQL = new StringBuilder(
-                "CREATE TABLE IF NOT EXISTS " + databaseName + ".campaign_product_subcategory ("
+                "CREATE TABLE IF NOT EXISTS " + databaseName + "." + table + " ("
                 + "feature_name String, ");
             // Generate feature SQL command
             StringBuilder generatedFeaturesSQL = generateFeatures(transformedData.get(0).entrySet().iterator().next().getValue().size(), databaseName);
@@ -100,7 +100,7 @@ public class LoadToClickHouse {
                     //         + generatedFeaturesSQL.toString().replace(" String", "") 
                     //         + ") VALUES (" + columnName + "," + placeholders.toString() + ")";
                     
-                    String insertSQL = "INSERT INTO " + databaseName + ".campaign_product_subcategory (feature_name, " 
+                    String insertSQL = "INSERT INTO " + databaseName + "." + table + " (feature_name, " 
                             + generatedFeaturesSQL.toString().replace(" String", "") 
                             + ") VALUES ('" + columnName + "', " + placeholders.toString() + ")";
 

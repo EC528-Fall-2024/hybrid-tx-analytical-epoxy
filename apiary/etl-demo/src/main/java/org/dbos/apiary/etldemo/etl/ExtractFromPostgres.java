@@ -5,10 +5,36 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 // import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.List;
+import java.util.ArrayList;
 
 public class ExtractFromPostgres {
+    public static List<String> getTableNames(String postgresUrl, String postgresUser, String postgresPassword) {
+        Connection connection = null;
+        Statement statement = null;
+        ResultSet resultSet = null;
+        List<String> tableNames = new ArrayList<>();
+        try {
+            // Connect to PostgreSQL
+            connection = DriverManager.getConnection(postgresUrl, postgresUser, postgresPassword);
+            System.out.println("Connected to PostgreSQL!");
 
-    public static ResultSet extractData(String postgresUrl, String postgresUser, String postgresPassword) {
+            // Obtain table names
+            String tableQuery = "SELECT table_name FROM information_schema.tables WHERE table_type = 'BASE TABLE' AND table_schema NOT IN ('pg_catalog', 'information_schema') ORDER BY table_name;";
+            statement = connection.createStatement();
+            ResultSet tableResultSet = statement.executeQuery(tableQuery);
+
+            // Store table names in a list
+            while (tableResultSet.next()) {
+                tableNames.add(tableResultSet.getString("table_name"));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return tableNames;
+    }
+
+    public static ResultSet extractData(String postgresUrl, String postgresUser, String postgresPassword, String table) {
         Connection connection = null;
         Statement statement = null;
         ResultSet resultSet = null;
@@ -20,7 +46,7 @@ public class ExtractFromPostgres {
 
             // Execute SQL query to extract data
             statement = connection.createStatement();
-            String query = "SELECT * FROM campaign_product_subcategory"; // Modify as needed
+            String query = "SELECT * FROM " + table; // Modify as needed
             resultSet = statement.executeQuery(query);
 
         } catch (Exception e) {
