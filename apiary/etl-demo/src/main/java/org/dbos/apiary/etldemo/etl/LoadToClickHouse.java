@@ -3,7 +3,7 @@ package org.dbos.apiary.etldemo.etl;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
+// import java.sql.ResultSet;
 import java.sql.Statement;
 
 import java.sql.SQLException;
@@ -30,11 +30,12 @@ public class LoadToClickHouse {
     }
 
     // ClickHouse connection parameters
-    private static final String CLICKHOUSE_URL = "jdbc:clickhouse://localhost:8123";
-    private static final String CLICKHOUSE_USER = "default";
-    private static final String CLICKHOUSE_PASSWORD = "";
+    // private static final String CLICKHOUSE_URL = "jdbc:clickhouse://localhost:8123";
+    // private static final String CLICKHOUSE_USER = "default";
+    // private static final String CLICKHOUSE_PASSWORD = "";
 
-    public static void loadData(List<Map<String, List<Object>>> transformedData) {
+    public static void loadData(List<Map<String, List<Object>>> transformedData,
+                                String clickhouseUrl, String clickhouseUser, String clickhousePassword) {
         Connection clickhouseConn = null;
         PreparedStatement clickhouseStmt = null;
         Statement statement = null;
@@ -42,7 +43,8 @@ public class LoadToClickHouse {
         try {
             // Step 1: Connect to ClickHouse
             try {
-                clickhouseConn = DriverManager.getConnection(CLICKHOUSE_URL, CLICKHOUSE_USER, CLICKHOUSE_PASSWORD);
+                // clickhouseConn = DriverManager.getConnection(CLICKHOUSE_URL, CLICKHOUSE_USER, CLICKHOUSE_PASSWORD);
+                clickhouseConn = DriverManager.getConnection(clickhouseUrl, clickhouseUser, clickhousePassword);
                 System.out.println("Connected to ClickHouse!");
                 if (clickhouseConn != null) {
                     statement = clickhouseConn.createStatement();
