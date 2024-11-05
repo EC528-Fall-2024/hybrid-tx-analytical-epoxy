@@ -37,15 +37,72 @@
     <script>
         function startETL() {
             // Call the ETL endpoint via a fetch request
+            const metrics = {
+                startTime: performance.now(),
+                startMemory: window.performance.memory ? window.performance.memory.usedJSHeapSize : 'Not available',
+                startNetwork: navigator.connection ? {
+                    downlink: navigator.connection.downlink,
+                    rtt: navigator.connection.rtt
+                } : 'Not available'
+            };
+
+            document.getElementById('notification').innerText = 'ETL Process Started...';
             fetch('/start-etl')
                 .then(response => response.text())
                 .then(message => {
-                    // Display the result message in the notification area
-                    document.getElementById('notification').innerText = message;
+                    const endTime = performance.now();
+                    
+                    // End Metrics
+                    const endMemory = window.performance.memory ? window.performance.memory.usedJSHeapSize : 'Not available';
+                    const endNetwork = navigator.connection ? {
+                        downlink: navigator.connection.downlink,
+                        rtt: navigator.connection.rtt
+                    } : 'Not available';
+
+                    // Execution Time
+                    const executionTime = (endTime - metrics.startTime).toFixed(2);
+                    // Calculate the execution time in kB/s
+                    // campaign_product_subcategory.csv is 23.53 kB in size
+                    const executionTimeByBytes = (23.53 / executionTime * 1000).toFixed(2);
+                
+                    // Memory Usage
+                    let memoryUsage = 'Not available';
+                    if (typeof metrics.startMemory === 'number' && typeof endMemory === 'number') {
+                        const memoryDiff = ((endMemory - metrics.startMemory) / (1024 * 1024)).toFixed(2);
+                        memoryUsage = `${memoryDiff} MB`;
+                    }
+
+                    // Network Info
+                    let networkInfo = 'Not available';
+                    if (typeof endNetwork !== 'string') {
+                        networkInfo = `Downlink: ${endNetwork.downlink}Mbps, Latency: ${endNetwork.rtt}ms`;
+                    }
+
+                    // CPU Usage
+                    let cpuInfo = 'Not available';
+                    if (window.navigator.hardwareConcurrency) {
+                        cpuInfo = `Logical CPU Cores: ${window.navigator.hardwareConcurrency}`;
+                    }
+                    
+                    // Display message with metrics
+                    document.getElementById('notification').innerHTML = `
+                    ${message}<br>
+                    <strong>Execution Time:</strong> ${executionTimeByBytes} kB/s<br>
+                    <strong>Memory Usage:</strong> ${memoryUsage}<br>
+                    <strong>Network Info:</strong> ${networkInfo}<br>
+                    <strong>CPU Info:</strong> ${cpuInfo}<br>
+                    `;
                 })
                 .catch(error => {
+                    const endTime = performance.now();
+                    const executionTime = (endTime - metrics.startTime).toFixed(2);
+                    // Calculate the execution time in kB/s
+                    // campaign_product_subcategory.csv is 23.53 kB in size
+                    const executionTimeByBytes = (23.53 / executionTime * 1000).toFixed(2);
                     // Display the error message
-                    document.getElementById('notification').innerText = 'Error: ' + error;
+                    document.getElementById('notification').innerText = `
+                        Error: ${error}<br>
+                    `;
                 });
         }
         function startOLAP(){
