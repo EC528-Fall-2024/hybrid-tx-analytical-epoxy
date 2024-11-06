@@ -177,6 +177,7 @@ Sprint 3. Implement ETL <br>
 [Sprint video](https://www.youtube.com/watch?v=i8_xEcuMeO4) | [Sprint slides](https://docs.google.com/presentation/d/1JaS7F-uORPoyf4aQPv05HhkPrSkrDUldQeUTgYz-IpQ/edit?usp=sharing)
 
 Sprint 4. Benchmark against similar ETL implementations
+[Sprint video]() | [Sprint slides](https://docs.google.com/presentation/d/1KjUBKjwwSP4n8LdfrPmf04ilOiCuZbRyyk79-6OXjyQ/edit?usp=sharing)
 
 Sprint 5. Improve write performance
 
