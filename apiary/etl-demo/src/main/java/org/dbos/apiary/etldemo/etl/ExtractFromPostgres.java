@@ -28,9 +28,12 @@ public class ExtractFromPostgres {
             while (tableResultSet.next()) {
                 tableNames.add(tableResultSet.getString("table_name"));
             }
+            
         } catch (Exception e) {
             e.printStackTrace();
         }
+        System.out.println("This is from extract from postgres:");
+        System.out.println(tableNames);
         return tableNames;
     }
 

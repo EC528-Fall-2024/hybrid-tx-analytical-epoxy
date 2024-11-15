@@ -1,7 +1,6 @@
 package org.dbos.apiary.etldemo.controller;
 
 import org.springframework.stereotype.Controller;
-import org.dbos.apiary.client.ApiaryWorkerClient;
 import org.springframework.http.MediaType;
 import org.dbos.apiary.etldemo.etl.ETLService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,8 +16,18 @@ import org.dbos.apiary.etldemo.clickhouse.ClickHouseService; // Clickhouse demo
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
+import java.sql.SQLException;
 import org.springframework.web.bind.annotation.RequestParam;
 
+// Epoxy
+import org.dbos.apiary.postgres.PostgresConnection;
+import org.dbos.apiary.utilities.ApiaryConfig;
+import org.dbos.apiary.worker.ApiaryNaiveScheduler;
+import org.dbos.apiary.worker.ApiaryWorker;
+import org.dbos.apiary.client.ApiaryWorkerClient;
+
+// Functions
+import org.dbos.apiary.etldemo.etl.GetTableNames;
 
 @Controller
 public class ETLController {
@@ -26,6 +35,20 @@ public class ETLController {
 
     @Autowired
     private ETLService etlService;
+
+    public ETLController() throws SQLException {
+        ApiaryConfig.captureUpdates = true;
+        ApiaryConfig.captureReads = true;
+        ApiaryConfig.provenancePort = 5432;  // Store provenance data in the same database.
+
+        PostgresConnection conn = new PostgresConnection("localhost", ApiaryConfig.postgresPort, "postgres", "dbos");
+        ApiaryWorker apiaryWorker = new ApiaryWorker(new ApiaryNaiveScheduler(), 4, ApiaryConfig.postgres, ApiaryConfig.provenanceDefaultAddress);
+        apiaryWorker.registerConnection(ApiaryConfig.postgres, conn);
+        apiaryWorker.registerFunction("GetTableNames", ApiaryConfig.postgres, GetTableNames::new);
+        apiaryWorker.startServing();
+
+        this.client = new ApiaryWorkerClient("localhost");
+    }
 
     // Connect to etl.html file
     @GetMapping("/")
@@ -101,6 +124,12 @@ public class ETLController {
     public ResponseEntity<Map<String, List<String>>> fetchTableContents(@RequestParam String database, @RequestParam String table) {
         try {
             // Get the contents of the specified table as a map
+            // ---- TEST -----
+            System.out.println("Returning table NAMESNAMESNMESNMNAMSNAMESNAMESNMESNMNAMSNAMESNAMESNMESNMNAMSNAMESNAMESNMESNMNAMSNAMESNAMESNMESNMNAMSNAMESNAMESNMESNMNAMSNAMESNAMESNMESNMNAMSNAMESNAMESNMESNMNAMSNAMESNAMESNMESNMNAMSNAMESNAMESNMESNMNAMSNAMESNAMESNMESNMNAMS");
+            String[] tableNames = client.executeFunction("GetTableNames").getStringArray();
+            System.out.println(tableNames);
+
+            // ---------------
             Map<String, List<String>> tableContents = clickHouseService.getTableContents(database, table);
             // Return the map of contents
             return ResponseEntity.ok(tableContents);

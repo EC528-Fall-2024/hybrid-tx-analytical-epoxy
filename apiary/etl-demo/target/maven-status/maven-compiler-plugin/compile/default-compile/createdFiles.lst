@@ -1,8 +1,9 @@
 org/dbos/apiary/etldemo/clickhouse/ClickHouseConnection.class
 org/dbos/apiary/etldemo/etl/ExtractFromPostgres.class
+org/dbos/apiary/etldemo/etl/GetTableNames.class
 org/dbos/apiary/etldemo/etl/LoadToClickHouse.class
 org/dbos/apiary/etldemo/etl/ETLService.class
+org/dbos/apiary/etldemo/ETLDemoApplication.class
 org/dbos/apiary/etldemo/etl/TransformService.class
 org/dbos/apiary/etldemo/controller/ETLController.class
-org/dbos/apiary/etldemo/ETLDemoApplication.class
 org/dbos/apiary/etldemo/clickhouse/ClickHouseService.class

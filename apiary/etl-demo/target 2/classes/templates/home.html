@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ETL Process</title>
+    <style>
+        body {
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+        .center-container {
+            text-align: center;
+            max-width: 400px;
+            width: 100%;
+        }
+        .form-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        label {
+            font-weight: bold;
+        }
+        input[type="text"],
+        input[type="password"] {
+            padding: 8px;
+            font-size: 14px;
+            width: 100%;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        #notification {
+            margin-top: 20px;
+            font-size: 18px;
+            color: #333;
+        }
+    </style>
+    <script>
+        function startETL() {
+            // Gather input values
+            const postgresUrl = document.getElementById('postgresUrl').value;
+            const postgresUser = document.getElementById('postgresUser').value;
+            const postgresPassword = document.getElementById('postgresPassword').value;
+            const clickhouseUrl = document.getElementById('clickhouseUrl').value;
+            const clickhouseUser = document.getElementById('clickhouseUser').value;
+            const clickhousePassword = document.getElementById('clickhousePassword').value;
+
+            // Call the ETL endpoint via a fetch request
+            const metrics = {
+                startTime: performance.now(),
+                startMemory: window.performance.memory ? window.performance.memory.usedJSHeapSize : 'Not available',
+                startNetwork: navigator.connection ? {
+                    downlink: navigator.connection.downlink,
+                    rtt: navigator.connection.rtt
+                } : 'Not available'
+            };
+
+            document.getElementById('notification').innerText = 'ETL Process Started...';
+
+            // Call the ETL endpoint via a fetch request, sending the connection details
+            fetch('/start-etl', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    postgresUrl,
+                    postgresUser,
+                    postgresPassword,
+                    clickhouseUrl,
+                    clickhouseUser,
+                    clickhousePassword
+                })
+            })
+                .then(response => response.text())
+                .then(message => {
+                    const endTime = performance.now();
+                    
+                    // End Metrics
+                    const endMemory = window.performance.memory ? window.performance.memory.usedJSHeapSize : 'Not available';
+                    const endNetwork = navigator.connection ? {
+                        downlink: navigator.connection.downlink,
+                        rtt: navigator.connection.rtt
+                    } : 'Not available';
+
+                    // Execution Time
+                    const executionTime = (endTime - metrics.startTime).toFixed(2);
+                    // Calculate the execution time in kB/s
+                    // campaign_product_subcategory.csv is 23.53 kB in size
+                    const executionTimeByBytes = (23.53 / executionTime * 1000).toFixed(2);
+                
+                    // Memory Usage
+                    let memoryUsage = 'Not available';
+                    if (typeof metrics.startMemory === 'number' && typeof endMemory === 'number') {
+                        const memoryDiff = ((endMemory - metrics.startMemory) / (1024 * 1024)).toFixed(2);
+                        memoryUsage = `${memoryDiff} MB`;
+                    }
+
+                    // Network Info
+                    let networkInfo = 'Not available';
+                    if (typeof endNetwork !== 'string') {
+                        networkInfo = `Downlink: ${endNetwork.downlink}Mbps, Latency: ${endNetwork.rtt}ms`;
+                    }
+
+                    // CPU Usage
+                    let cpuInfo = 'Not available';
+                    if (window.navigator.hardwareConcurrency) {
+                        cpuInfo = `Logical CPU Cores: ${window.navigator.hardwareConcurrency}`;
+                    }
+                    
+                    // Display message with metrics
+                    document.getElementById('notification').innerHTML = `
+                    ${message}<br>
+                    <strong>Execution Time:</strong> ${executionTimeByBytes} kB/s<br>
+                    <strong>Memory Usage:</strong> ${memoryUsage}<br>
+                    <strong>Network Info:</strong> ${networkInfo}<br>
+                    <strong>CPU Info:</strong> ${cpuInfo}<br>
+                    `;
+                })
+                .catch(error => {
+                    const endTime = performance.now();
+                    const executionTime = (endTime - metrics.startTime).toFixed(2);
+                    // Calculate the execution time in kB/s
+                    // campaign_product_subcategory.csv is 23.53 kB in size
+                    const executionTimeByBytes = (23.53 / executionTime * 1000).toFixed(2);
+                    // Display the error message
+                    document.getElementById('notification').innerText = `
+                        Error: ${error}<br>
+                    `;
+                });
+        }
+        
+        function startOLAP() {
+            window.location.href = 'olap';
+        }
+    </script>
+</head>
+<body>
+    <div class="center-container">
+        <h1>Trigger ETL Process</h1>
+        <div class="form-container">
+            <label for="postgresUrl">OLTP Database URL:</label>
+            <input type="text" id="postgresUrl" placeholder="e.g., jdbc:postgresql://localhost:5432/your_db">
+
+            <label for="postgresUser">OLTP Username:</label>
+            <input type="text" id="postgresUser">
+
+            <label for="postgresPassword">OLTP Password:</label>
+            <input type="password" id="postgresPassword">
+
+            <label for="clickhouseUrl">OLAP Database URL:</label>
+            <input type="text" id="clickhouseUrl" placeholder="e.g., jdbc:clickhouse://localhost:8123">
+
+            <label for="clickhouseUser">OLAP Username:</label>
+            <input type="text" id="clickhouseUser"> '../'
+
+            <label for="clickhousePassword">OLAP Password:</label>
+            <input type="password" id="clickhousePassword">
+        </div>
+        <div class="button-container">
+            <button onclick="startETL()">Start ETL</button>
+            <button onclick="startOLAP()">OLAP Database</button>
+        </div>
+        <!-- Notification area to display success or error message -->
+        <p id="notification"></p>
+    </div>
+</body>
+</html>
+
