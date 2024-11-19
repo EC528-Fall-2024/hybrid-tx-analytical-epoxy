@@ -9,27 +9,40 @@ This tutorial will show you how to use our ETL website to perform ETL on public 
 
 https://etl-service-hybrid-tx-analytical-epoxy-31f481.apps.shift.nerc.mghpcc.org/ 
 
-
+---
 
 ### Inputs
 #### OLTP DATABASES
-  URL: jdbc:<>://<PUBLIC IP>:<DATABASE PUBLIC PORT>/<DATABASE NAME>
-  USERNAME: user name of database
-  PASSWORD: pasword to access database
-  
-### OLAP DATABASES
-  URL: jdbc:<>://<PUBLIC IP>:<DATABASE PUBLIC PORT>/<DATABASE NAME>
-  USERNAME: user name of database
-  PASSWORD: pasword to access database
+ # Database Connection Information
 
-### Examples of URLs
 
-Postgres: jdbc:postgresql://<PUBLIC IP>:5432/<DATABASE NAME>
+- **URL**: `jdbc:<NAME OF OLTP DATABASE>://<PUBLIC IP>:<DATABASE PUBLIC PORT>/<DATABASE NAME>`
+- **USERNAME**: *username of the database*
+- **PASSWORD**: *password to access the database*
 
-MySQL: jdbc:mysql://<PUBLIC_IP>:3306/<DB_NAME>
+## OLAP Database Connection
+- **URL**: `jdbc:<NAME OF OLAP DATABASE>://<PUBLIC IP>:<DATABASE PUBLIC PORT>/<DATABASE NAME>`
+- **USERNAME**: *username of the database*
+- **PASSWORD**: *password to access the database*
 
-ClickHouse: jdbc:clickhouse://<PUBLIC_IP>:8123/<DB_NAME>
+---
 
+## Examples of Connection URLs
+
+Here are examples of how to structure JDBC URLs for specific database types:
+
+- **PostgreSQL**:  
+  `jdbc:postgresql://<PUBLIC IP>:5432/<DATABASE NAME>`
+
+- **MySQL**:  
+  `jdbc:mysql://<PUBLIC IP>:3306/<DATABASE NAME>`
+
+- **ClickHouse**:  
+  `jdbc:clickhouse://<PUBLIC IP>:8123/<DATABASE NAME>`
+
+Replace each placeholder with your specific database information to ensure successful connections.
+
+---
 
 ### Start ETL Process
 Once the urls have been types into the appropriate boxes, the click on start ETL. There should be text indicating the process has started, and once it completes it should show these metrics:
