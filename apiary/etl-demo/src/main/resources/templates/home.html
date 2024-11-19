@@ -147,19 +147,19 @@
         <h1>Trigger ETL Process</h1>
         <div class="form-container">
             <label for="postgresUrl">OLTP Database URL:</label>
-            <input type="text" id="postgresUrl" placeholder="e.g., jdbc:postgresql://localhost:5432/your_db">
+            <input type="text" id="postgresUrl" value="jdbc:postgresql://localhost:5432/campaign_product_subcategory">
 
             <label for="postgresUser">OLTP Username:</label>
-            <input type="text" id="postgresUser">
+            <input type="text" id="postgresUser" value="postgres">
 
             <label for="postgresPassword">OLTP Password:</label>
-            <input type="password" id="postgresPassword">
+            <input type="password" id="postgresPassword" value="dbos">
 
             <label for="clickhouseUrl">OLAP Database URL:</label>
-            <input type="text" id="clickhouseUrl" placeholder="e.g., jdbc:clickhouse://localhost:8123">
+            <input type="text" id="clickhouseUrl" value="jdbc:clickhouse://localhost:8123">
 
             <label for="clickhouseUser">OLAP Username:</label>
-            <input type="text" id="clickhouseUser"> '../'
+            <input type="text" id="clickhouseUser" value="default"> '../'
 
             <label for="clickhousePassword">OLAP Password:</label>
             <input type="password" id="clickhousePassword">
