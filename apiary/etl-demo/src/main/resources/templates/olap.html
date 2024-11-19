@@ -41,6 +41,17 @@
         <tbody id="contentsList"></tbody>
     </table>
 
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Row ID</th>
+                <th>Campaign ID</th>
+            </tr>
+        </thead>
+        <tbody id="tableBody">
+        </tbody>
+    </table>
+
     <script>
         async function fetchDatabases() {
             try {
@@ -117,8 +128,134 @@
                     list.appendChild(rowElement);
                 }
 
+                // Analyze the table
+                if ("campaign_product_subcategory" === table) {
+                    const analytics = analyzeTable(contents, columnNames);
+                    displayAnalytics(analytics);
+                }
+
             } catch (error) {
                 console.error('Error fetching table contents:', error);
+            }
+        }
+
+        function analyzeTable(contents, columnNames) {
+            const analytics = {};
+
+            columnNames.forEach(column => {
+                // Convert column values to numbers and filter out non-numeric values
+                const numericValues = contents[column]
+                    .map(value => parseFloat(value))
+                    .filter(value => !isNaN(value));
+
+                if (numericValues.length > 0) {
+                    analytics[column] = {
+                        mean: calculateMean(numericValues),
+                        median: calculateMedian(numericValues),
+                        sum: calculateSum(numericValues),
+                        min: Math.min(...numericValues),
+                        max: Math.max(...numericValues),
+                        standardDeviation: calculateStandardDeviation(numericValues),
+                        count: numericValues.length
+                    };
+                }
+            });
+
+            return analytics;
+        }
+
+        function displayAnalytics(analytics) {
+            // Create or get analytics container
+            let analyticsContainer = document.getElementById('analyticsContainer');
+            if (!analyticsContainer) {
+                analyticsContainer = document.createElement('div');
+                analyticsContainer.id = 'analyticsContainer';
+                document.getElementById('contentsList').parentNode.insertBefore(
+                    analyticsContainer,
+                    document.getElementById('contentsList')
+                );
+            }
+            analyticsContainer.innerHTML = '<h2>Statistical Analysis</h2>';
+
+            // Create analytics cards for each numeric column
+            Object.entries(analytics).forEach(([column, stats]) => {
+                const card = createAnalyticsCard(column, stats);
+                analyticsContainer.appendChild(card);
+            });
+        }
+
+        function createAnalyticsCard(column, stats) {
+            const card = document.createElement('div');
+            card.className = 'analytics-card';
+            
+            card.innerHTML = `
+                <h3>${column}</h3>
+                <table class="analytics-table">
+                    <tr><td>Mean:</td><td>${formatNumber(stats.mean)}</td></tr>
+                    <tr><td>Median:</td><td>${formatNumber(stats.median)}</td></tr>
+                    <tr><td>Sum:</td><td>${formatNumber(stats.sum)}</td></tr>
+                    <tr><td>Min:</td><td>${formatNumber(stats.min)}</td></tr>
+                    <tr><td>Max:</td><td>${formatNumber(stats.max)}</td></tr>
+                    <tr><td>Std Dev:</td><td>${formatNumber(stats.standardDeviation)}</td></tr>
+                    <tr><td>Count:</td><td>${stats.count}</td></tr>
+                </table>
+            `;
+            
+            return card;
+        }
+
+        // Statistical calculation functions
+        function calculateMean(values) {
+            return values.reduce((sum, value) => sum + value, 0) / values.length;
+        }
+
+        function calculateMedian(values) {
+            const sorted = [...values].sort((a, b) => a - b);
+            const middle = Math.floor(sorted.length / 2);
+            
+            if (sorted.length % 2 === 0) {
+                return (sorted[middle - 1] + sorted[middle]) / 2;
+            }
+            return sorted[middle];
+        }
+
+        function calculateSum(values) {
+            return values.reduce((sum, value) => sum + value, 0);
+        }
+
+        function calculateStandardDeviation(values) {
+            const mean = calculateMean(values);
+            const squaredDiffs = values.map(value => Math.pow(value - mean, 2));
+            const variance = calculateMean(squaredDiffs);
+            return Math.sqrt(variance);
+        }
+
+        function formatNumber(number) {
+            return Number.isInteger(number) ? number : number.toFixed(2);
+        }
+
+        function populateTable(data) {
+            const tableBody = document.getElementById('tableBody');
+            
+            // Get unique row IDs and campaign IDs
+            const rowIds = Object.keys(data).filter(key => key.startsWith('row_'));
+            const campaignIds = data['campaign_id'];
+            
+            // Create table rows
+            for (let i = 0; i < rowIds.length; i++) {
+                const row = document.createElement('tr');
+                
+                // Row ID cell
+                const rowIdCell = document.createElement('td');
+                rowIdCell.textContent = rowIds[i];
+                row.appendChild(rowIdCell);
+                
+                // Campaign ID cell
+                const campaignIdCell = document.createElement('td');
+                campaignIdCell.textContent = campaignIds[i];
+                row.appendChild(campaignIdCell);
+                
+                tableBody.appendChild(row);
             }
         }
 
