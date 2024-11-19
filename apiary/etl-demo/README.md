@@ -4,6 +4,8 @@ This tutorial will show you how to build a simple social network
 web application using Apiary and [Spring Boot](https://spring.io/projects/spring-boot) for ETL process.
 We use Apiary's Postgres (for OLTP) and ClickHouse (for OLAP) as backends.
 
+**Only follow this if you want to perform the ETL on private local data. For data with public IPs please look at our CloudReadMe.md**
+
 
 
 
