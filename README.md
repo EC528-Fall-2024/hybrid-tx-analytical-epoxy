@@ -174,7 +174,7 @@ If the databases are **public**:
       
 If the databases are **local**:
 - Clone this GitHub
-- Save the docker image inside Apiary Docker folder 
+- Save the docker image inside Apiary scripts folder 
 - Follow the steps inside the README.md file insside the apiary folder.
 
 
