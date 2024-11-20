@@ -1,50 +1,3 @@
-// package org.dbos.apiary.etldemo.etl;
-
-// import java.sql.ResultSet;
-// import java.sql.ResultSetMetaData;
-// import java.util.ArrayList;
-// import java.util.HashMap;
-// import java.util.List;
-// import java.util.Map;
-
-// public class TransformService {
-
-//     public static List<Map<String, List<Object>>> transformColumnToRow(ResultSet resultSet) throws Exception {
-//         // Create a map to store column name as key and its corresponding values as a list
-//         Map<String, List<Object>> columnToValuesMap = new HashMap<>();
-//         ResultSetMetaData metaData = resultSet.getMetaData();
-//         int columnCount = metaData.getColumnCount();
-
-//         // Initialize the map with column names as keys and empty lists as values
-//         for (int i = 1; i <= columnCount; i++) {
-//             columnToValuesMap.put(metaData.getColumnName(i), new ArrayList<>());
-//         }
-
-//         // Loop through each row in the result set
-//         while (resultSet.next()) {
-//             for (int i = 1; i <= columnCount; i++) {
-//                 String columnName = metaData.getColumnName(i);
-//                 Object columnValue = resultSet.getObject(i);
-                
-//                 // Add each row's value to the respective column list
-//                 columnToValuesMap.get(columnName).add(columnValue);
-//             }
-//         }
-
-//         // Convert the map to a list of maps where each map represents a row in the new format
-//         List<Map<String, List<Object>>> rowBasedData = new ArrayList<>();
-
-//         // We convert the columnToValuesMap into a list of maps for easy processing
-//         for (Map.Entry<String, List<Object>> entry : columnToValuesMap.entrySet()) {
-//             Map<String, List<Object>> row = new HashMap<>();
-//             row.put(entry.getKey(), entry.getValue());
-//             rowBasedData.add(row);
-//         }
-
-//         return rowBasedData;
-//     }
-// }
-
 package org.dbos.apiary.etldemo.etl;
 
 import java.sql.ResultSet;
@@ -53,33 +6,69 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class TransformService {
+    private static final int BUFFER_SIZE = 10000;
 
     public static List<Map<String, List<Object>>> transformColumnToRow(ResultSet resultSet) throws Exception {
-        Map<String, List<Object>> columnToValuesMap = new HashMap<>();
         ResultSetMetaData metaData = resultSet.getMetaData();
         int columnCount = metaData.getColumnCount();
-
+        
+        // Use ConcurrentHashMap for thread-safe operations
+        Map<String, List<Object>> columnToValuesMap = new ConcurrentHashMap<>();
+        
+        // Initialize column lists with capacity
         for (int i = 1; i <= columnCount; i++) {
-            columnToValuesMap.put(metaData.getColumnName(i), new ArrayList<>());
+            columnToValuesMap.put(metaData.getColumnName(i), 
+                                new ArrayList<>(BUFFER_SIZE));
         }
 
+        // Process in batches
+        Object[] buffer = new Object[BUFFER_SIZE];
+        int count = 0;
+
         while (resultSet.next()) {
+            Map<String, Object> row = new HashMap<>(columnCount);
             for (int i = 1; i <= columnCount; i++) {
-                String columnName = metaData.getColumnName(i);
-                Object columnValue = resultSet.getObject(i);
-                columnToValuesMap.get(columnName).add(columnValue);
+                row.put(metaData.getColumnName(i), resultSet.getObject(i));
+            }
+            buffer[count++] = row;
+
+            if (count == BUFFER_SIZE) {
+                processBuffer(buffer, count, columnToValuesMap);
+                count = 0;
             }
         }
 
+        // Process remaining rows
+        if (count > 0) {
+            processBuffer(buffer, count, columnToValuesMap);
+        }
+
+        // Convert to final format
+        return convertToFinalFormat(columnToValuesMap);
+    }
+
+    private static void processBuffer(Object[] buffer, int count,
+                                    Map<String, List<Object>> columnToValuesMap) {
+        for (int i = 0; i < count; i++) {
+            @SuppressWarnings("unchecked")
+            Map<String, Object> row = (Map<String, Object>) buffer[i];
+            for (Map.Entry<String, Object> entry : row.entrySet()) {
+                columnToValuesMap.get(entry.getKey()).add(entry.getValue());
+            }
+        }
+    }
+
+    private static List<Map<String, List<Object>>> convertToFinalFormat(
+            Map<String, List<Object>> columnToValuesMap) {
         List<Map<String, List<Object>>> rowBasedData = new ArrayList<>();
         for (Map.Entry<String, List<Object>> entry : columnToValuesMap.entrySet()) {
             Map<String, List<Object>> row = new HashMap<>();
             row.put(entry.getKey(), entry.getValue());
             rowBasedData.add(row);
         }
-
         return rowBasedData;
     }
 }

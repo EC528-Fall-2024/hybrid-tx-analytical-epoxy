@@ -26,7 +26,7 @@ public class GetTableNames extends PostgresFunction {
         }
         System.out.println("Found these tables:");
         System.out.println(tableNames);
-        System.out.println("ENds:");
+        System.out.println("Ends:");
         return tableNames.toArray(new String[0]);
     }
 }
