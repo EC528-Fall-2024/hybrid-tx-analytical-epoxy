@@ -1,60 +1,158 @@
-package org.dbos.apiary.etldemo.etl;
+// package org.dbos.apiary.etldemo.etl;
 
+// import java.sql.Connection;
+// import java.sql.DriverManager;
+// import java.sql.ResultSet;
+// // import java.sql.SQLException;
+// import java.sql.Statement;
+
+// public class ExtractFromPostgres {
+
+//     public static ResultSet extractData(String postgresUrl, String postgresUser, String postgresPassword) {
+//         Connection connection = null;
+//         Statement statement = null;
+//         ResultSet resultSet = null;
+        
+//         try {
+//             // Connect to PostgreSQL
+//             connection = DriverManager.getConnection(postgresUrl, postgresUser, postgresPassword);
+//             System.out.println("Connected to PostgreSQL!");
+
+//             // Execute SQL query to extract data
+//             statement = connection.createStatement();
+//             String query = "SELECT * FROM campaign_product_subcategory"; // Modify as needed
+//             resultSet = statement.executeQuery(query);
+
+//         } catch (Exception e) {
+//             e.printStackTrace();
+//         }
+//         return resultSet; // Return the result set for further processing
+//     }
+// }
+
+package org.dbos.apiary.etldemo.etl;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
-// import java.sql.SQLException;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ExtractFromPostgres {
+    private static Map<String, List<String>> tableNameCache = new HashMap<>();
+
     public static List<String> getTableNames(String postgresUrl, String postgresUser, String postgresPassword) {
+        String cacheKey = postgresUrl + postgresUser + postgresPassword;
+        if (tableNameCache.containsKey(cacheKey)) {
+            return tableNameCache.get(cacheKey);
+        }
+
         Connection connection = null;
         Statement statement = null;
         ResultSet resultSet = null;
         List<String> tableNames = new ArrayList<>();
         try {
-            // Connect to PostgreSQL
             connection = DriverManager.getConnection(postgresUrl, postgresUser, postgresPassword);
             System.out.println("Connected to PostgreSQL!");
 
-            // Obtain table names
-            String tableQuery = "SELECT table_name FROM information_schema.tables WHERE table_type = 'BASE TABLE' AND table_schema NOT IN ('pg_catalog', 'information_schema') ORDER BY table_name;";
+            String tableQuery = "SELECT table_name FROM information_schema.tables WHERE table_type = 'BASE TABLE' AND table_schema NOT IN ('pg_catalog', 'information_schema') AND table_name != 'last_extracted_time' ORDER BY table_name;";
             statement = connection.createStatement();
-            ResultSet tableResultSet = statement.executeQuery(tableQuery);
+            resultSet = statement.executeQuery(tableQuery);
 
-            // Store table names in a list
-            while (tableResultSet.next()) {
-                tableNames.add(tableResultSet.getString("table_name"));
+            while (resultSet.next()) {
+                tableNames.add(resultSet.getString("table_name"));
             }
-            
+
+            tableNameCache.put(cacheKey, tableNames);
         } catch (Exception e) {
             e.printStackTrace();
         }
-        System.out.println("This is from extract from postgres:");
-        System.out.println(tableNames);
         return tableNames;
     }
 
-    public static ResultSet extractData(String postgresUrl, String postgresUser, String postgresPassword, String table) {
+    // Method to check if a timestamp column exists in current table
+    public static String checkTimestampColumn(String postgresUrl, String postgresUser, String postgresPassword, String table) {
         Connection connection = null;
-        Statement statement = null;
         ResultSet resultSet = null;
-        
+        String timestampColumn = null;
+
         try {
-            // Connect to PostgreSQL
             connection = DriverManager.getConnection(postgresUrl, postgresUser, postgresPassword);
             System.out.println("Connected to PostgreSQL!");
 
-            // Execute SQL query to extract data
-            statement = connection.createStatement();
-            String query = "SELECT * FROM " + table; // Modify as needed
+            // Query to check for columns with a timestamp type
+            String query = "SELECT column_name " +
+                    "FROM information_schema.columns " +
+                    "WHERE table_name = '" + table + "' " +
+                    "AND data_type IN ('timestamp without time zone', 'timestamp with time zone')";
+            Statement statement = connection.createStatement();
             resultSet = statement.executeQuery(query);
 
+            if (resultSet.next()) {
+                timestampColumn = resultSet.getString("column_name");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (resultSet != null) resultSet.close();
+                if (connection != null) connection.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return timestampColumn;
+    }
+
+    // Method to add a timestamp column if it doesn't exist
+    public static void addTimestampColumn(String postgresUrl, String postgresUser, String postgresPassword, String table) {
+        Connection connection = null;
+
+        try {
+            connection = DriverManager.getConnection(postgresUrl, postgresUser, postgresPassword);
+            System.out.println("Connected to PostgreSQL!");
+            
+            // Add a new timestamp column and set its default value to current time
+            String alterTableQuery = "ALTER TABLE " + table + " ADD COLUMN created_at TIMESTAMP DEFAULT current_timestamp";
+            Statement statement = connection.createStatement();
+            statement.executeUpdate(alterTableQuery);
+
+            System.out.println("Timestamp column 'created_at' added to table " + table + ".");
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (connection != null) connection.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public static ResultSet extractData(String postgresUrl, String postgresUser, String postgresPassword, String table,
+                                        String timestampColumn, String lastExtractedTime) {
+        Connection connection = null;
+        Statement statement = null;
+        ResultSet resultSet = null;
+
+        try {
+            connection = DriverManager.getConnection(postgresUrl, postgresUser, postgresPassword);
+            System.out.println("Connected to PostgreSQL!");
+
+            statement = connection.createStatement();
+            String query;
+            if (timestampColumn == null || lastExtractedTime == null) {
+                query = "SELECT * FROM " + table;
+            } else {
+                query = "SELECT * FROM " + table + " WHERE " + timestampColumn + " > '" + lastExtractedTime + "'";
+            }
+            resultSet = statement.executeQuery(query);
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return resultSet; // Return the result set for further processing
+        return resultSet;
     }
 }
