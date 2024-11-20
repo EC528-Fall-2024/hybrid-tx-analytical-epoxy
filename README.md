@@ -163,7 +163,22 @@ Stretch Goals:
 - Improve write performance
 - Work with Massachuset Massachuttes Open Cloud (MOC)
 
-## 6.  Release Planning:
+## 6.   How to utilize this Github:
+
+first identify if your databses are local or if they are public. Both databases must be either both local or both public.
+
+If the databases are **public**:
+- Make sure both databases have public IP, a public port number, and that you know the username and pasword
+- Access the website throught this link : https://etl-service-hybrid-tx-analytical-epoxy-31f481.apps.shift.nerc.mghpcc.org/
+- For more explination or step by step explination follow the steps inside the CloudReadMe.md file inside the apiary folder.
+      
+If the databases are **local**:
+- Clone this GitHub
+- Save the docker image inside Apiary Docker folder 
+- Follow the steps inside the README.md file insside the apiary folder.
+
+
+## 7.  Release Planning:
 
 ### Sprints:
 
@@ -183,7 +198,7 @@ Sprint 5. Improve write performance
 
  Note: Once our sprint schedule is known, we will update this section with specific sprint/release dates.
 
-## 7.  Resources:
+## 8.  Resources:
 
 - Epoxy original Paper: https://www.google.com/url?q=https://petereliaskraft.net/res/p2732-kraft.pdf&sa=D&source=editors&ust=1726857165369021&usg=AOvVaw2Pc4xnTr_hCMSMBesATRi4
 - Epoxy Simplfied explination: https://www.google.com/url?q=https://muratbuffalo.blogspot.com/2023/11/epoxy-acid-transactions-across-diverse.html&sa=D&source=editors&ust=1726857165369400&usg=AOvVaw1rpSAR_4dFpcT6gvIVj1gX
