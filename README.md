@@ -34,7 +34,7 @@
 
 ## 1.   Vision and Goals Of The Project:
 
-The goal of this project is to create an implementation of Epoxy to enable accessing multiple databases (MySQL, FoundationDB, DuckDB) or storage systems (S3) through a single interface to allow rapid read and writes between databases.
+The goal of this project is to create an implementation of Epoxy to enable accessing multiple databases (MySQL, ClickHouse, Postgres DB) or storage systems (S3) through a single interface to allow rapid read and writes between databases.
 
 ## 2. User Cases
 
@@ -64,7 +64,7 @@ The goal of this project is to create an implementation of Epoxy to enable acces
 
 ## 3.   Scope and Features Of The Project:
 
-The scope of this project is to build a **Hybrid Transactional/Analytical Processing (HTAP)** system using Epoxy, integrating both **OLTP (Online Transaction Processing)** and **OLAP (Online Analytical Processing)** databases through a unified interface. This solution of Epoxy will enable transactions across diverse data stores without relying on the costly two-phase commit protocol.
+The scope of this project is to build a **Hybrid Transactional/Analytical Processing (HTAP)** system using Epoxy, integrating both **OLTP (Online Transaction Processing)** and **OLAP (Online Analytical Processing)** databases through a unified interface. This solution of Epoxy will enable transactions across diverse data stores without relying on the costly two-phase commit protocol. We will provide a cloud and local version.
 
 <br>
 
@@ -72,11 +72,11 @@ The scope of this project is to build a **Hybrid Transactional/Analytical Proces
 
 1. Integration of OLTP and OLAP Databases
 
-   - Implement an HTAP system using Epoxy to combine OLTP (mySQL) and OLAP (DuckDB) databases.
+   - Implement an HTAP system using Epoxy to combine OLTP (Postgress) and OLAP (ClickHouse) databases.
    - Handle both real-time and batched updates with a focus on atomicity (ensuring complete or no transactions) and isolation (transactions are executed independently of each other).
 2. OLTP Operations (Handling Transactions)
 
-   - Develop and optimize OLTP operations in mySQL (FoundationDB potentially if time applicable) for real-time, high-frequency transactions.
+   - Develop and optimize OLTP operations in mySQL  for real-time, high-frequency transactions.
    - Support transactional integrity and maintain data consistency within transactions.
 3. OLAP Operations (Running Analytics)
 
@@ -188,5 +188,6 @@ Sprint 5. Improve write performance
 - Epoxy original Paper: https://www.google.com/url?q=https://petereliaskraft.net/res/p2732-kraft.pdf&sa=D&source=editors&ust=1726857165369021&usg=AOvVaw2Pc4xnTr_hCMSMBesATRi4
 - Epoxy Simplfied explination: https://www.google.com/url?q=https://muratbuffalo.blogspot.com/2023/11/epoxy-acid-transactions-across-diverse.html&sa=D&source=editors&ust=1726857165369400&usg=AOvVaw1rpSAR_4dFpcT6gvIVj1gX
 - Epoxy github: https://github.com/DBOS-project/apiary
+- ETL Cloud Website: https://etl-service-hybrid-tx-analytical-epoxy-31f481.apps.shift.nerc.mghpcc.org/
 
 ---
