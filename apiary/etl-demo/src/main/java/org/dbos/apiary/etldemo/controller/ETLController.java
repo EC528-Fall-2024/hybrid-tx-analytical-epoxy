@@ -62,6 +62,12 @@ public class ETLController {
     }
 
     @PostMapping(value = "/start-etl", consumes = MediaType.APPLICATION_JSON_VALUE)
+
+    @GetMapping("/")
+    public String etlPage() {
+        return "/home";  
+    
+    }
     public ResponseEntity<String> startETLProcess(@RequestBody Map<String, String> request) {
         try {
             String postgresUrl = request.get("postgresUrl");
