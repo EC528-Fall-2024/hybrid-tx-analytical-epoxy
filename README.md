@@ -170,12 +170,12 @@ first identify if your databses are local or if they are public. Both databases 
 If the databases are **public**:
 - Make sure both databases have public IP, a public port number, and that you know the username and pasword
 - Access the website throught this link : https://etl-service-hybrid-tx-analytical-epoxy-31f481.apps.shift.nerc.mghpcc.org/
-- For more explination or step by step explination follow the steps inside the CloudReadMe.md file inside the apiary folder.
+- For more explination or step by step explination follow the steps inside the CloudReadMe.md file inside the ETL folder.
       
 If the databases are **local**:
 - Clone this GitHub
 - Save the docker image inside Apiary scripts folder 
-- Follow the steps inside the README.md file insside the apiary folder.
+- Follow the steps inside the README.md file insside the ETL folder.
 
 
 ## 7.  Release Planning:
