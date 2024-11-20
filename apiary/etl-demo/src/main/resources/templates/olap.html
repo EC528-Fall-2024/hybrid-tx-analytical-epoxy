@@ -43,12 +43,12 @@
 
     <table class="data-table">
         <thead>
-            <tr>
-                <th>Row ID</th>
-                <th>Campaign ID</th>
+            <tr id="headerRow">
+                <!-- Headers will be inserted here -->
             </tr>
         </thead>
-        <tbody id="tableBody">
+        <tbody id="contentsList">
+            <!-- Data rows will be inserted here -->
         </tbody>
     </table>
 
@@ -100,13 +100,12 @@
                 }
                 
                 const contents = await response.json();
-
-                // Extract the keys (column names) and values (rows) for the table
                 const columnNames = Object.keys(contents);
-                const numRows = contents[columnNames[0]].length; // Assume all arrays are of the same length
+                const numRows = contents[columnNames[0]].length;
 
+                // Clear previous contents
                 const list = document.getElementById('contentsList');
-                list.innerHTML = ''; // Clear previous contents
+                list.innerHTML = '';
 
                 // Create table header
                 const headerRow = document.createElement('tr');
@@ -117,21 +116,40 @@
                 });
                 list.appendChild(headerRow);
 
-                // Create table rows
+                // Create table rows and collect row data
+                const rowsData = [];
                 for (let i = 0; i < numRows; i++) {
                     const rowElement = document.createElement('tr');
+                    const rowValues = [];
+                    
                     columnNames.forEach(column => {
                         const cell = document.createElement('td');
                         cell.textContent = contents[column][i];
                         rowElement.appendChild(cell);
+                        // Collect numeric values for analysis
+                        const numValue = parseFloat(contents[column][i]);
+                        if (!isNaN(numValue)) {
+                            rowValues.push(numValue);
+                        }
                     });
+                    
+                    if (rowValues.length > 0) {
+                        rowsData.push(rowValues);
+                    }
                     list.appendChild(rowElement);
                 }
 
-                // Analyze the table
-                if ("campaign_product_subcategory" === table) {
-                    const analytics = analyzeTable(contents, columnNames);
-                    displayAnalytics(analytics);
+                // Remove existing analytics if switching tables
+                const existingAnalytics = document.getElementById('analyticsContainer');
+                if (existingAnalytics) {
+                    existingAnalytics.remove();
+                }
+
+                // Only show analytics for the uploaded dataset
+                const uploadedDatasetName = 'campaign_product_subcategory';
+                if (table === uploadedDatasetName) {
+                    const analytics = analyzeRows(rowsData);
+                    displayRowAnalytics(analytics);
                 }
 
             } catch (error) {
@@ -139,72 +157,147 @@
             }
         }
 
-        function analyzeTable(contents, columnNames) {
-            const analytics = {};
+        function analyzeRows(rowsData) {
+            const analytics = {
+                rowSums: [],
+                rowMeans: [],
+                rowMedians: [],
+                rowStdDevs: [],
+                rowMins: [],
+                rowMaxs: []
+            };
 
-            columnNames.forEach(column => {
-                // Convert column values to numbers and filter out non-numeric values
-                const numericValues = contents[column]
-                    .map(value => parseFloat(value))
-                    .filter(value => !isNaN(value));
-
-                if (numericValues.length > 0) {
-                    analytics[column] = {
-                        mean: calculateMean(numericValues),
-                        median: calculateMedian(numericValues),
-                        sum: calculateSum(numericValues),
-                        min: Math.min(...numericValues),
-                        max: Math.max(...numericValues),
-                        standardDeviation: calculateStandardDeviation(numericValues),
-                        count: numericValues.length
-                    };
-                }
+            rowsData.forEach((row, index) => {
+                analytics.rowSums.push({
+                    rowIndex: index + 1,
+                    value: calculateSum(row)
+                });
+                analytics.rowMeans.push({
+                    rowIndex: index + 1,
+                    value: calculateMean(row)
+                });
+                analytics.rowMedians.push({
+                    rowIndex: index + 1,
+                    value: calculateMedian(row)
+                });
+                analytics.rowStdDevs.push({
+                    rowIndex: index + 1,
+                    value: calculateStandardDeviation(row)
+                });
+                analytics.rowMins.push({
+                    rowIndex: index + 1,
+                    value: Math.min(...row)
+                });
+                analytics.rowMaxs.push({
+                    rowIndex: index + 1,
+                    value: Math.max(...row)
+                });
             });
 
             return analytics;
         }
 
-        function displayAnalytics(analytics) {
-            // Create or get analytics container
-            let analyticsContainer = document.getElementById('analyticsContainer');
-            if (!analyticsContainer) {
-                analyticsContainer = document.createElement('div');
-                analyticsContainer.id = 'analyticsContainer';
-                document.getElementById('contentsList').parentNode.insertBefore(
-                    analyticsContainer,
-                    document.getElementById('contentsList')
-                );
-            }
-            analyticsContainer.innerHTML = '<h2>Statistical Analysis</h2>';
+        function displayRowAnalytics(analytics) {
+            const analyticsContainer = document.createElement('div');
+            analyticsContainer.id = 'analyticsContainer';
+            analyticsContainer.className = 'analytics-container';
 
-            // Create analytics cards for each numeric column
-            Object.entries(analytics).forEach(([column, stats]) => {
-                const card = createAnalyticsCard(column, stats);
-                analyticsContainer.appendChild(card);
-            });
+            // Add title
+            const title = document.createElement('h2');
+            title.textContent = 'Row-wise Statistical Analysis';
+            analyticsContainer.appendChild(title);
+
+            // Create summary statistics
+            const summaryCard = createSummaryCard(analytics);
+            analyticsContainer.appendChild(summaryCard);
+
+            // Create detailed statistics cards
+            const detailsCard = createDetailsCard(analytics);
+            analyticsContainer.appendChild(detailsCard);
+
+            // Insert analytics container before the table
+            const contentsList = document.getElementById('contentsList');
+            contentsList.parentNode.insertBefore(analyticsContainer, contentsList);
         }
 
-        function createAnalyticsCard(column, stats) {
+        function createSummaryCard(analytics) {
             const card = document.createElement('div');
-            card.className = 'analytics-card';
+            card.className = 'analytics-card summary-card';
             
-            card.innerHTML = `
-                <h3>${column}</h3>
-                <table class="analytics-table">
-                    <tr><td>Mean:</td><td>${formatNumber(stats.mean)}</td></tr>
-                    <tr><td>Median:</td><td>${formatNumber(stats.median)}</td></tr>
-                    <tr><td>Sum:</td><td>${formatNumber(stats.sum)}</td></tr>
-                    <tr><td>Min:</td><td>${formatNumber(stats.min)}</td></tr>
-                    <tr><td>Max:</td><td>${formatNumber(stats.max)}</td></tr>
-                    <tr><td>Std Dev:</td><td>${formatNumber(stats.standardDeviation)}</td></tr>
-                    <tr><td>Count:</td><td>${stats.count}</td></tr>
-                </table>
-            `;
+            const summaryStats = {
+                'Row Sums': analytics.rowSums,
+                'Row Means': analytics.rowMeans,
+                'Row Medians': analytics.rowMedians,
+                'Row Standard Deviations': analytics.rowStdDevs
+            };
+
+            let html = '<h3>Summary Statistics</h3><table class="analytics-table">';
             
+            Object.entries(summaryStats).forEach(([statName, values]) => {
+                const allValues = values.map(v => v.value);
+                html += `
+                    <tr>
+                        <td><strong>${statName}</strong></td>
+                        <td>
+                            Min: ${formatNumber(Math.min(...allValues))}<br>
+                            Max: ${formatNumber(Math.max(...allValues))}<br>
+                            Mean: ${formatNumber(calculateMean(allValues))}
+                        </td>
+                    </tr>
+                `;
+            });
+
+            html += '</table>';
+            card.innerHTML = html;
             return card;
         }
 
-        // Statistical calculation functions
+        function createDetailsCard(analytics) {
+            const card = document.createElement('div');
+            card.className = 'analytics-card details-card';
+            
+            let html = `
+                <h3>Detailed Row Statistics</h3>
+                <div class="table-container">
+                    <table class="analytics-table">
+                        <thead>
+                            <tr>
+                                <th>Row</th>
+                                <th>Sum</th>
+                                <th>Mean</th>
+                                <th>Median</th>
+                                <th>Std Dev</th>
+                                <th>Min</th>
+                                <th>Max</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+
+            // Add rows for each statistic
+            for (let i = 0; i < analytics.rowSums.length; i++) {
+                html += `
+                    <tr>
+                        <td>${analytics.rowSums[i].rowIndex}</td>
+                        <td>${formatNumber(analytics.rowSums[i].value)}</td>
+                        <td>${formatNumber(analytics.rowMeans[i].value)}</td>
+                        <td>${formatNumber(analytics.rowMedians[i].value)}</td>
+                        <td>${formatNumber(analytics.rowStdDevs[i].value)}</td>
+                        <td>${formatNumber(analytics.rowMins[i].value)}</td>
+                        <td>${formatNumber(analytics.rowMaxs[i].value)}</td>
+                    </tr>
+                `;
+            }
+
+            html += '</tbody></table></div>';
+            card.innerHTML = html;
+            return card;
+        }
+
+        function calculateSum(values) {
+            return values.reduce((sum, value) => sum + value, 0);
+        }
+
         function calculateMean(values) {
             return values.reduce((sum, value) => sum + value, 0) / values.length;
         }
@@ -219,10 +312,6 @@
             return sorted[middle];
         }
 
-        function calculateSum(values) {
-            return values.reduce((sum, value) => sum + value, 0);
-        }
-
         function calculateStandardDeviation(values) {
             const mean = calculateMean(values);
             const squaredDiffs = values.map(value => Math.pow(value - mean, 2));
@@ -232,31 +321,6 @@
 
         function formatNumber(number) {
             return Number.isInteger(number) ? number : number.toFixed(2);
-        }
-
-        function populateTable(data) {
-            const tableBody = document.getElementById('tableBody');
-            
-            // Get unique row IDs and campaign IDs
-            const rowIds = Object.keys(data).filter(key => key.startsWith('row_'));
-            const campaignIds = data['campaign_id'];
-            
-            // Create table rows
-            for (let i = 0; i < rowIds.length; i++) {
-                const row = document.createElement('tr');
-                
-                // Row ID cell
-                const rowIdCell = document.createElement('td');
-                rowIdCell.textContent = rowIds[i];
-                row.appendChild(rowIdCell);
-                
-                // Campaign ID cell
-                const campaignIdCell = document.createElement('td');
-                campaignIdCell.textContent = campaignIds[i];
-                row.appendChild(campaignIdCell);
-                
-                tableBody.appendChild(row);
-            }
         }
 
         // Fetch databases on page load
