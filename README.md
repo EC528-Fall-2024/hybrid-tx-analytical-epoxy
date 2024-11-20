@@ -195,7 +195,7 @@ Sprint 4. Benchmark against similar ETL implementations <br>
 [Sprint video](https://youtu.be/FSBOGl79jeM) | [Sprint slides](https://docs.google.com/presentation/d/1KjUBKjwwSP4n8LdfrPmf04ilOiCuZbRyyk79-6OXjyQ/edit?usp=sharing)
 
 Sprint 5. Improve write performance <br>
-[Sprint video]() | [Sprint slides](https://docs.google.com/presentation/d/1ysfmqq9K6bgN8biIrvzm6_Mv3thjAwAdyFL51icEy5w/edit?usp=sharing)
+[Sprint video](https://www.youtube.com/watch?v=Dm_JDNXZeqU) | [Sprint slides](https://docs.google.com/presentation/d/1ysfmqq9K6bgN8biIrvzm6_Mv3thjAwAdyFL51icEy5w/edit?usp=sharing)
 
  Note: Once our sprint schedule is known, we will update this section with specific sprint/release dates.
 
