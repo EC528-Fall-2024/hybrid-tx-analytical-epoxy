@@ -20,6 +20,10 @@ public class ClickHouseService {
         this.clickHouseConnection = new ClickHouseConnection();
     }
 
+    public void setConnectionParams(String url, String user, String password) {
+        clickHouseConnection.setConnectionParams(url, user, password);
+    }
+
     // Method to fetch list of databases
     public List<String> getDatabases() {
         List<String> databases = new ArrayList<>();
@@ -30,7 +34,8 @@ public class ClickHouseService {
                 databases.add(resultSet.getString(1));
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            // e.printStackTrace();
+            System.out.println("Failed getDatabases");
         }
         return databases;
     }
@@ -45,7 +50,8 @@ public class ClickHouseService {
                 tables.add(resultSet.getString(1));
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            // e.printStackTrace();
+            System.out.println("Failed getTables");
         }
         return tables;
     }
@@ -78,7 +84,8 @@ public class ClickHouseService {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            // e.printStackTrace();
+            System.out.println("Failed getTableContents");
         }
         return tableContents;
     }

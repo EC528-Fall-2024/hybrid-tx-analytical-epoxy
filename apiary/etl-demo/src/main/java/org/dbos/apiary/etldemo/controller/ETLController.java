@@ -29,6 +29,9 @@ public class ETLController {
     @Autowired
     private ETLService etlService;
 
+    @Autowired
+    private ClickHouseService clickHouseService;
+
     public ETLController() throws SQLException {
     }
 
@@ -49,6 +52,9 @@ public class ETLController {
             String clickhouseUser = request.get("clickhouseUser");
             String clickhousePassword = request.get("clickhousePassword");
 
+            // Set the URL for ClickHouseService
+            clickHouseService.setConnectionParams(clickhouseUrl, clickhouseUser, clickhousePassword);
+
             // Start the ETL process
             etlService.runETL(postgresUrl, postgresUser, postgresPassword, clickhouseUrl, clickhouseUser, clickhousePassword);
             // Return success message
@@ -62,9 +68,6 @@ public class ETLController {
 
     // Clickhouse
     // Inject the ClickHouseService into the controller
-    @Autowired
-    private ClickHouseService clickHouseService;
-
     @GetMapping("/olap")
     public String olapPage() {
         return "olap"; 
@@ -105,12 +108,6 @@ public class ETLController {
     public ResponseEntity<Map<String, List<String>>> fetchTableContents(@RequestParam String database, @RequestParam String table) {
         try {
             // Get the contents of the specified table as a map
-            // ---- TEST -----
-            System.out.println("Returning table NAMES");
-            String[] tableNames = client.executeFunction("GetTableNames").getStringArray();
-            System.out.println(tableNames);
-
-            // ---------------
             Map<String, List<String>> tableContents = clickHouseService.getTableContents(database, table);
             // Return the map of contents
             return ResponseEntity.ok(tableContents);
