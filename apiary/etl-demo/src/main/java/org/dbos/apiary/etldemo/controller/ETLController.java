@@ -30,17 +30,6 @@ public class ETLController {
     private ETLService etlService;
 
     public ETLController() throws SQLException {
-        ApiaryConfig.captureUpdates = true;
-        ApiaryConfig.captureReads = true;
-        ApiaryConfig.provenancePort = 5432;  // Store provenance data in the same database.
-
-        PostgresConnection conn = new PostgresConnection("localhost", ApiaryConfig.postgresPort, "postgres", "dbos");
-        ApiaryWorker apiaryWorker = new ApiaryWorker(new ApiaryNaiveScheduler(), 4, ApiaryConfig.postgres, ApiaryConfig.provenanceDefaultAddress);
-        apiaryWorker.registerConnection(ApiaryConfig.postgres, conn);
-        apiaryWorker.registerFunction("GetTableNames", ApiaryConfig.postgres, GetTableNames::new);
-        apiaryWorker.startServing();
-
-        this.client = new ApiaryWorkerClient("localhost");
     }
 
     // Connect to etl.html file
@@ -117,7 +106,7 @@ public class ETLController {
         try {
             // Get the contents of the specified table as a map
             // ---- TEST -----
-            System.out.println("Returning table NAMESNAMESNMESNMNAMSNAMESNAMESNMESNMNAMSNAMESNAMESNMESNMNAMSNAMESNAMESNMESNMNAMSNAMESNAMESNMESNMNAMSNAMESNAMESNMESNMNAMSNAMESNAMESNMESNMNAMSNAMESNAMESNMESNMNAMSNAMESNAMESNMESNMNAMSNAMESNAMESNMESNMNAMSNAMESNAMESNMESNMNAMS");
+            System.out.println("Returning table NAMES");
             String[] tableNames = client.executeFunction("GetTableNames").getStringArray();
             System.out.println(tableNames);
 
