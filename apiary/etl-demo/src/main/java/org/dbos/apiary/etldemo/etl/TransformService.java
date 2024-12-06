@@ -15,46 +15,42 @@ public class TransformService {
         ResultSetMetaData metaData = resultSet.getMetaData();
         int columnCount = metaData.getColumnCount();
         
-        // Use ConcurrentHashMap for thread-safe operations
-        Map<String, List<Object>> columnToValuesMap = new ConcurrentHashMap<>();
+        Map<String, List<Object>> columnToValuesMap = new HashMap<>();
         
-        // Initialize column lists with capacity
+        // Initialize column lists
         for (int i = 1; i <= columnCount; i++) {
-            columnToValuesMap.put(metaData.getColumnName(i), 
-                                new ArrayList<>(BUFFER_SIZE));
+            columnToValuesMap.put(metaData.getColumnName(i), new ArrayList<>());
         }
-
-        // Process in batches
-        Object[] buffer = new Object[BUFFER_SIZE];
-        int count = 0;
-
+    
+        final int BUFFER_SIZE = 1000;
+        List<Map<String, Object>> buffer = new ArrayList<>(BUFFER_SIZE);
+    
         while (resultSet.next()) {
-            Map<String, Object> row = new HashMap<>(columnCount);
+            Map<String, Object> row = new HashMap<>();
             for (int i = 1; i <= columnCount; i++) {
                 row.put(metaData.getColumnName(i), resultSet.getObject(i));
             }
-            buffer[count++] = row;
-
-            if (count == BUFFER_SIZE) {
-                processBuffer(buffer, count, columnToValuesMap);
-                count = 0;
+            buffer.add(row);
+    
+            if (buffer.size() >= BUFFER_SIZE) {
+                processBuffer(buffer, columnToValuesMap);
+                buffer.clear();
             }
         }
-
+    
         // Process remaining rows
-        if (count > 0) {
-            processBuffer(buffer, count, columnToValuesMap);
+        if (!buffer.isEmpty()) {
+            processBuffer(buffer, columnToValuesMap);
         }
-
-        // Convert to final format
-        return convertToFinalFormat(columnToValuesMap);
+    
+        List<Map<String, List<Object>>> result = new ArrayList<>();
+        result.add(columnToValuesMap);
+        return result;
     }
-
-    private static void processBuffer(Object[] buffer, int count,
+    
+    private static void processBuffer(List<Map<String, Object>> buffer, 
                                     Map<String, List<Object>> columnToValuesMap) {
-        for (int i = 0; i < count; i++) {
-            @SuppressWarnings("unchecked")
-            Map<String, Object> row = (Map<String, Object>) buffer[i];
+        for (Map<String, Object> row : buffer) {
             for (Map.Entry<String, Object> entry : row.entrySet()) {
                 columnToValuesMap.get(entry.getKey()).add(entry.getValue());
             }

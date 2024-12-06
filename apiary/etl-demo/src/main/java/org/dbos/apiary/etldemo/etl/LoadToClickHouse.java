@@ -6,6 +6,7 @@ import java.sql.PreparedStatement;
 // import java.sql.ResultSet;
 import java.sql.Statement;
 
+import java.text.SimpleDateFormat;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
@@ -29,106 +30,98 @@ public class LoadToClickHouse {
         return generatedFeatures;
     }
 
+    // Helper function to determine ClickHouse data types
+    private static String getClickHouseType(Object value) {
+        if (value == null) return "String";
+        
+        if (value instanceof Integer) return "UInt32";
+        if (value instanceof Long) return "UInt64";
+        if (value instanceof String) return "String";
+        if (value instanceof Double || value instanceof Float) return "Float64";
+        if (value instanceof Boolean) return "UInt8";
+        if (value instanceof java.sql.Timestamp 
+            || value instanceof java.util.Date) return "DateTime";
+        
+        // Default to String for unknown types
+        return "String";
+    }
+
     // ClickHouse connection parameters
     // private static final String CLICKHOUSE_URL = "jdbc:clickhouse://localhost:8123";
     // private static final String CLICKHOUSE_USER = "default";
     // private static final String CLICKHOUSE_PASSWORD = "";
 
     public static void loadData(List<Map<String, List<Object>>> transformedData,
-                                String clickhouseUrl, String clickhouseUser, String clickhousePassword,
-                                String tableName, String databaseName) {
-        Connection clickhouseConn = null;
-        PreparedStatement clickhouseStmt = null;
-        Statement statement = null;
-
-        try {
-            // Step 1: Connect to ClickHouse
-            try {
-                clickhouseConn = DriverManager.getConnection(clickhouseUrl, clickhouseUser, clickhousePassword);
-                System.out.println("Connected to ClickHouse!");
-                if (clickhouseConn != null) {
-                    statement = clickhouseConn.createStatement();
-                } else {
-                    System.err.println("ClickHouse connection is null!");
-                    return;
-                }
-            } catch (SQLException e) {
-                System.err.println("Failed to connect to ClickHouse: " + e.getMessage());
-                e.printStackTrace();
-                return;
-            }
-
-            // Step 2: Check if the ClickHouse database exists, if not, create it
-            // String databaseName = System.getenv("campaign_product_subcategory");
-            // if (databaseName == null || databaseName.isEmpty()) {
-            //     System.err.println("Database name is not provided!");
-            //     databaseName = "campaign_product_subcategory";
-            //     // return;
-            // }
-            // String databaseName = tableName;
+                          String clickhouseUrl, String clickhouseUser, String clickhousePassword,
+                          String tableName, String databaseName) {
+        try (Connection clickhouseConn = DriverManager.getConnection(clickhouseUrl, clickhouseUser, clickhousePassword);
+            Statement statement = clickhouseConn.createStatement()) {
+            
+            System.out.println("Connected to ClickHouse!");
+            
+            // Create database
             statement.executeUpdate("CREATE DATABASE IF NOT EXISTS " + databaseName);
 
-            // Create table if not exist
+            // Get the first row to analyze structure
+            Map<String, List<Object>> firstRow = transformedData.get(0);
+            
+            // Create table dynamically
             StringBuilder createTableSQL = new StringBuilder(
-                "CREATE TABLE IF NOT EXISTS " + databaseName + "." + tableName + " ("
-                + "feature_name String, ");
-            // Generate feature SQL command
-            StringBuilder generatedFeaturesSQL = generateFeatures(transformedData.get(0).entrySet().iterator().next().getValue().size(), databaseName);
-            // Complete the SQL query with the ClickHouse engine configuration
-            createTableSQL.append(generatedFeaturesSQL);
+                "CREATE TABLE IF NOT EXISTS " + databaseName + "." + tableName + " (\n"
+                + "feature_name String");
+
+            // Add columns based on the first value of each feature
+            for (Map.Entry<String, List<Object>> entry : firstRow.entrySet()) {
+                List<Object> values = entry.getValue();
+                if (!values.isEmpty()) {
+                    Object firstValue = values.get(0);
+                    String columnType = getClickHouseType(firstValue);
+                    createTableSQL.append(",\n").append(entry.getKey())
+                                .append(" ").append(columnType);
+                }
+            }
+            
             createTableSQL.append(") ENGINE = MergeTree() ORDER BY feature_name");
+            
             statement.executeUpdate(createTableSQL.toString());
+
+            statement.executeUpdate("TRUNCATE TABLE " + databaseName + "." + tableName);
             
             System.out.println("Database: [" + databaseName + "], table: [" + tableName + "] checked/created.");
 
-            // Step 3: Process the transformed data
+            // Process the transformed data
             for (Map<String, List<Object>> row : transformedData) {
                 for (Map.Entry<String, List<Object>> entry : row.entrySet()) {
                     String columnName = entry.getKey();
                     List<Object> values = entry.getValue();
 
-                    // Dynamically construct a SQL insert statement based on the number of values
-                    StringBuilder placeholders = new StringBuilder();
-                    for (int i = 0; i < values.size(); i++) {
-                        placeholders.append("?,");
+                    // Format datetime values properly
+                    StringBuilder valuesStr = new StringBuilder();
+                    valuesStr.append("('").append(columnName).append("'");
+                    
+                    for (Object value : values) {
+                        if (value instanceof java.sql.Timestamp || value instanceof java.util.Date) {
+                            // Format datetime as 'YYYY-MM-DD HH:MM:SS'
+                            String formattedDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+                                .format(value);
+                            valuesStr.append(",'").append(formattedDate).append("'");
+                        } else {
+                            valuesStr.append(",'").append(value).append("'");
+                        }
                     }
-                    // Remove trailing comma
-                    if (placeholders.length() > 0) {
-                        placeholders.deleteCharAt(placeholders.length() - 1);
-                    }
+                    valuesStr.append(")");
 
-                    String insertSQL = "INSERT INTO " + databaseName + "." + tableName + " (feature_name, " 
-                            + generatedFeaturesSQL.toString().replace(" String", "") 
-                            + ") VALUES ('" + columnName + "', " + placeholders.toString() + ")";
-
-                    // System.out.println(insertSQL);
-                    clickhouseStmt = clickhouseConn.prepareStatement(insertSQL);
-
-                    // Dynamically set the values in the prepared statement
-                    for (int i = 0; i < values.size(); i++) {
-                        clickhouseStmt.setObject(i + 1, values.get(i)); // Generalized to handle any data type
-                    }
-
-                    // clickhouseStmt.addBatch(); // Add to batch for efficiency 
-                    clickhouseStmt.executeUpdate();
+                    String insertSQL = "INSERT INTO " + databaseName + "." + tableName + 
+                                    " VALUES " + valuesStr.toString();
+                    
+                    statement.executeUpdate(insertSQL);
                 }
             }
 
-            // Step 4: Execute the batch
-            // clickhouseStmt.executeBatch();
             System.out.println("Data successfully inserted into ClickHouse.");
 
         } catch (SQLException e) {
             e.printStackTrace();
-        } finally {
-            // Close the connections and statements
-            try {
-                if (clickhouseStmt != null) clickhouseStmt.close();
-                if (statement != null) statement.close();
-                if (clickhouseConn != null) clickhouseConn.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
         }
     }
 }
