@@ -20,7 +20,6 @@ import org.dbos.apiary.utilities.ApiaryConfig;
 import org.dbos.apiary.worker.ApiaryNaiveScheduler;
 import org.dbos.apiary.worker.ApiaryWorker;
 import org.dbos.apiary.client.ApiaryWorkerClient;
-import org.dbos.apiary.etldemo.etl.GetTableNames;
 
 @Controller
 public class ETLController {
