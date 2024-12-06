@@ -61,7 +61,7 @@ public class ClickHouseService {
         Map<String, List<String>> tableContents = new HashMap<>();
         try (Connection connection = clickHouseConnection.getClickHouseConnection();
             Statement statement = connection.createStatement();
-            ResultSet resultSet = statement.executeQuery("SELECT * FROM " + database + "." + table + " LIMIT 10")) {
+            ResultSet resultSet = statement.executeQuery("SELECT * FROM " + database + "." + table)) {
     
             ResultSetMetaData metaData = resultSet.getMetaData();
             int columnCount = metaData.getColumnCount();
