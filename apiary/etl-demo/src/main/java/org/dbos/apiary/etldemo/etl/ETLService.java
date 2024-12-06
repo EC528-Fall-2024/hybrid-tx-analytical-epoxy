@@ -104,24 +104,6 @@ public class ETLService {
         }
     }
 
-    public static List<Map<String, Object>> resultSetToList(ResultSet resultSet) {
-        List<Map<String, Object>> rows = new ArrayList<>();
-        try {
-            ResultSetMetaData metaData = resultSet.getMetaData();
-            int columnCount = metaData.getColumnCount();
-
-            while (resultSet.next()) {
-                Map<String, Object> row = new HashMap<>();
-                for (int i = 1; i <= columnCount; i++) {
-                    row.put(metaData.getColumnName(i), resultSet.getObject(i));
-                }
-                rows.add(row);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return rows;
-    }
 
     public void runETL(String postgresUrl, String postgresUser, String postgresPassword, 
                        String clickhouseUrl, String clickhouseUser, String clickhousePassword) {
@@ -139,6 +121,19 @@ public class ETLService {
             createLastExtractedTimeTable(postgresUrl, postgresUser, postgresPassword);
 
             for (String tableName : tableNames) {
+                // Pre ETL process: Handle deleted rows
+                GetDeletedRows.createTrigger(postgresUrl, postgresUser, postgresPassword, tableName);
+                List<Map<String, Object>> deletedRows = GetDeletedRows.getDeletedRows(postgresUrl, postgresUser, postgresPassword, tableName);
+                if (!deletedRows.isEmpty()) {
+                    // When there are rows deleted since last ETL
+                    GetDeletedRows.deleteFromOLAP(clickhouseUrl, clickhouseUser, clickhousePassword, tableName, deletedRows);
+                    GetDeletedRows.clearProcessedDeletions(postgresUrl, postgresUser, postgresPassword, tableName);
+                    System.out.println("Deleted rows synchronized.");
+                } else {
+                    System.out.println("No deleted rows to process.");
+                }
+
+                // Mail ETL process
                 // Step 1: Extract data from PostgreSQL using provided credentials - incremental load
                 // 1.1: Check for a timestamp column
                 String timestampColumn = ExtractFromPostgres.checkTimestampColumn(postgresUrl, postgresUser, postgresPassword, tableName);
