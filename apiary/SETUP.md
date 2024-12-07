@@ -51,6 +51,18 @@ All should pass.
 
 We have created three tables (`users`, `posts`, and `likes`) with dummy data to show an example of our epoxy being used on a mock social media application. Here is how to add this data to the docker file:
 
+1. Go to the `sql/dummy-data` directory. ***NOTE: THIS IS IMPORTANT**
+
+    ```
+    cd apiary/sql/dummy-data
+    ```
+
+2. Run the `testing_data_generator.py` python script to create the three .csv files.
+
+    ```
+    py testing_data_generator.py
+    ```
+
 1. Ensure your docker file is initialized and running. To see if it is, you can run the Docker app or check on cli.
 
     ```
@@ -60,6 +72,7 @@ We have created three tables (`users`, `posts`, and `likes`) with dummy data to 
 2. Run the `add_postgres_data.sh` file.
 
     ```
+    cd ../..
     scripts/add_postgres_data.sh
     ```
 
