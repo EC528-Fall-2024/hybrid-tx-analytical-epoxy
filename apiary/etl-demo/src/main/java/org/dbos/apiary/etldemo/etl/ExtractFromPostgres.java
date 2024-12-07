@@ -84,11 +84,11 @@ public class ExtractFromPostgres {
             System.out.println("Connected to PostgreSQL!");
             
             // Add a new timestamp column and set its default value to current time
-            String alterTableQuery = "ALTER TABLE " + table + " ADD COLUMN created_at TIMESTAMP DEFAULT current_timestamp";
+            String alterTableQuery = "ALTER TABLE " + table + " ADD COLUMN updated_at TIMESTAMP DEFAULT current_timestamp";
             Statement statement = connection.createStatement();
             statement.executeUpdate(alterTableQuery);
 
-            System.out.println("Timestamp column 'created_at' added to table " + table + ".");
+            System.out.println("Timestamp column 'updated_at' added to table " + table + ".");
         } catch (Exception e) {
             e.printStackTrace();
         } finally {

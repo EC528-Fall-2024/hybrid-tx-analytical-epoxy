@@ -6,10 +6,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class TransformService {
-    private static final int BUFFER_SIZE = 10000;
+    // private static final int BUFFER_SIZE = 10000;
 
     public static List<Map<String, List<Object>>> transformColumnToRow(ResultSet resultSet) throws Exception {
         ResultSetMetaData metaData = resultSet.getMetaData();
@@ -57,8 +56,7 @@ public class TransformService {
         }
     }
 
-    private static List<Map<String, List<Object>>> convertToFinalFormat(
-            Map<String, List<Object>> columnToValuesMap) {
+    private static List<Map<String, List<Object>>> convertToFinalFormat(Map<String, List<Object>> columnToValuesMap) {
         List<Map<String, List<Object>>> rowBasedData = new ArrayList<>();
         for (Map.Entry<String, List<Object>> entry : columnToValuesMap.entrySet()) {
             Map<String, List<Object>> row = new HashMap<>();

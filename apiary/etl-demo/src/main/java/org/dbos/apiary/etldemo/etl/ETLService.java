@@ -1,14 +1,10 @@
 package org.dbos.apiary.etldemo.etl;
-
 import org.springframework.stereotype.Service;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -133,7 +129,7 @@ public class ETLService {
                     System.out.println("No deleted rows to process.");
                 }
 
-                // Mail ETL process
+                // Main ETL process
                 // Step 1: Extract data from PostgreSQL using provided credentials - incremental load
                 // 1.1: Check for a timestamp column
                 String timestampColumn = ExtractFromPostgres.checkTimestampColumn(postgresUrl, postgresUser, postgresPassword, tableName);
@@ -155,8 +151,7 @@ public class ETLService {
                 // Update last extract time
                 updateLastExtractedTime(postgresUrl, postgresUser, postgresPassword, tableName);
 
-                //resultSet = ExtractFromPostgres.extractData(postgresUrl, postgresUser, postgresPassword, tableName);
-                
+              
                 // Only perform transform and load if we attracted data
                 if (resultSet != null && resultSet.isBeforeFirst()) {
                     // Step 2: Transform data from column-based to row-based

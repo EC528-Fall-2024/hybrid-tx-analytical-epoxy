@@ -2,15 +2,12 @@ package org.dbos.apiary.etldemo.etl;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-// import java.sql.ResultSet;
 import java.sql.Statement;
 
 import java.text.SimpleDateFormat;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
-import java.util.ArrayList;
 
 
 public class LoadToClickHouse {
@@ -59,78 +56,66 @@ public class LoadToClickHouse {
             Statement statement = clickhouseConn.createStatement()) {
             
             System.out.println("Connected to ClickHouse!");
-            // System.out.println("data: " + transformedData);
             
             // Create database
             statement.executeUpdate("CREATE DATABASE IF NOT EXISTS " + databaseName);
 
-            // Get the first row to analyze structure and number of columns
+            // Get the first row to analyze structure
             Map<String, List<Object>> firstRow = transformedData.get(0);
-            List<String> columnNames = new ArrayList<>(firstRow.keySet());
-            int numRows = firstRow.values().iterator().next().size();
-
-            // Create table dynamically with numbered columns
+            
+            // Create table dynamically
             StringBuilder createTableSQL = new StringBuilder(
-                "CREATE TABLE IF NOT EXISTS " + databaseName + "." + tableName + " (");
+                "CREATE TABLE IF NOT EXISTS " + databaseName + "." + tableName + " (\n"
+                + "feature_name String");
 
-            for (int i = 0; i < columnNames.size(); i++) {
-                if (i > 0) {
-                    createTableSQL.append(", ");
+            // Add columns based on the first value of each feature
+            for (Map.Entry<String, List<Object>> entry : firstRow.entrySet()) {
+                List<Object> values = entry.getValue();
+                if (!values.isEmpty()) {
+                    Object firstValue = values.get(0);
+                    String columnType = getClickHouseType(firstValue);
+                    createTableSQL.append(",\n").append(entry.getKey())
+                                .append(" ").append(columnType);
                 }
-                createTableSQL.append(columnNames.get(i)).append(" String");
             }
             
-            createTableSQL.append(") ENGINE = MergeTree() ORDER BY tuple()");
+            createTableSQL.append(") ENGINE = MergeTree() ORDER BY feature_name");
+            
             statement.executeUpdate(createTableSQL.toString());
 
             statement.executeUpdate("TRUNCATE TABLE " + databaseName + "." + tableName);
             
             System.out.println("Database: [" + databaseName + "], table: [" + tableName + "] checked/created.");
-        
-            // Prepare insert query
-            StringBuilder insertQuery = new StringBuilder();
-            insertQuery.append("INSERT INTO ")
-                      .append(databaseName)
-                      .append(".")
-                      .append(tableName)
-                      .append(" (")
-                      .append(String.join(", ", columnNames))
-                      .append(") VALUES ");
 
-            // Insert data row by row
-            for (Map<String, List<Object>> dataMap : transformedData) {
-                List<Object> firstColumnValues = dataMap.get(columnNames.get(0));
-                int rowCount = firstColumnValues.size();
-                
-                for (int row = 0; row < rowCount; row++) {
-                    if (row > 0 || transformedData.indexOf(dataMap) > 0) {
-                        insertQuery.append(", ");
-                    }
+            // Process the transformed data
+            for (Map<String, List<Object>> row : transformedData) {
+                for (Map.Entry<String, List<Object>> entry : row.entrySet()) {
+                    String columnName = entry.getKey();
+                    List<Object> values = entry.getValue();
+
+                    // Format datetime values properly
+                    StringBuilder valuesStr = new StringBuilder();
+                    valuesStr.append("('").append(columnName).append("'");
                     
-                    insertQuery.append("(");
-                    for (int col = 0; col < columnNames.size(); col++) {
-                        if (col > 0) {
-                            insertQuery.append(", ");
-                        }
-                        Object value = dataMap.get(columnNames.get(col)).get(row);
-                        
-                        if (value == null) {
-                            insertQuery.append("NULL");
-                        } else if (value instanceof Number) {
-                            insertQuery.append("'" + value + "'");
-                        } else if (value instanceof java.sql.Timestamp || value instanceof java.util.Date) {
+                    for (Object value : values) {
+                        if (value instanceof java.sql.Timestamp || value instanceof java.util.Date) {
+                            // Format datetime as 'YYYY-MM-DD HH:MM:SS'
                             String formattedDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
                                 .format(value);
-                            insertQuery.append("'" + formattedDate + "'");
+                            valuesStr.append(",'").append(formattedDate).append("'");
                         } else {
-                            insertQuery.append("'" + value.toString().replace("'", "\\'") + "'");
+                            valuesStr.append(",'").append(value).append("'");
                         }
                     }
-                    insertQuery.append(")");
+                    valuesStr.append(")");
+
+                    String insertSQL = "INSERT INTO " + databaseName + "." + tableName + 
+                                    " VALUES " + valuesStr.toString();
+                    
+                    statement.executeUpdate(insertSQL);
                 }
             }
 
-            statement.execute(insertQuery.toString());
             System.out.println("Data successfully inserted into ClickHouse.");
 
         } catch (SQLException e) {

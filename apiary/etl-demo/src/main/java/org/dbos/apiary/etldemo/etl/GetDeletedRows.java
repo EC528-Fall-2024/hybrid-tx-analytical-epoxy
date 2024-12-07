@@ -1,7 +1,4 @@
 package org.dbos.apiary.etldemo.etl;
-import org.dbos.apiary.postgres.PostgresContext;
-import org.dbos.apiary.postgres.PostgresFunction;
-import org.json.simple.JSONObject;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -30,7 +27,7 @@ public class GetDeletedRows {
             connection = DriverManager.getConnection(postgresUrl, postgresUser, postgresPassword);
             statement = connection.createStatement();
 
-            // Create the 'deleted_rows' table if it doesn't exist
+            // 1. Create the 'deleted_rows' table if it doesn't exist
             String createDeletedRowsTable = "CREATE TABLE IF NOT EXISTS deleted_rows (" +
                                             "    table_name TEXT NOT NULL, " +
                                             "    deleted_row_data JSONB NOT NULL, " +
@@ -38,7 +35,7 @@ public class GetDeletedRows {
                                             ");";
             statement.executeUpdate(createDeletedRowsTable);
 
-            // 1. Create the 'log_deleted_rows' function
+            // 2. Create the 'log_deleted_rows' function
             String createFunction = "CREATE OR REPLACE FUNCTION log_deleted_rows() " +
                                     "RETURNS TRIGGER AS $$ " +
                                     "BEGIN " +
@@ -51,14 +48,14 @@ public class GetDeletedRows {
             statement.executeUpdate(createFunction);
 
 
-            // 2. Create the trigger for the specified table
+            // 3. Create the trigger for the specified table
             String createTrigger = "CREATE TRIGGER capture_deletions " +
                                     "AFTER DELETE ON " + table + " " +
                                     "FOR EACH ROW " +
                                     "EXECUTE FUNCTION log_deleted_rows();";
                                     
             String checkTrigger = "SELECT 1 FROM information_schema.triggers " +
-                      "WHERE event_object_table = '" + table + "' AND trigger_name = 'capture_deletions';";
+                                    "WHERE event_object_table = '" + table + "' AND trigger_name = 'capture_deletions';";
 
             ResultSet rs = statement.executeQuery(checkTrigger);
             if (!rs.next()) {
@@ -67,12 +64,6 @@ public class GetDeletedRows {
             } else {
                 System.out.println("Trigger already exists, reusing it.");
             }
-
-            
-
-            // Execute the SQL statements
-            // statement.executeUpdate(createFunction);
-            // statement.executeUpdate(createTrigger);
 
             System.out.println("Trigger created successfully for table: " + table);
 
