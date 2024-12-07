@@ -37,7 +37,7 @@ public class ETLController {
     // Connect to etl.html file
     @GetMapping("/")
     public String etlPage() {
-        return "/home";  
+        return "home";  
     }
 
     // This endpoint is called when the ETL button is clicked
