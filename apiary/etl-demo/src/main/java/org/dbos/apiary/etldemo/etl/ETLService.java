@@ -119,9 +119,23 @@ public class ETLService {
     public void runETL(String postgresUrl, String postgresUser, String postgresPassword, 
                        String clickhouseUrl, String clickhouseUser, String clickhousePassword) {
         ResultSet resultSet = null;
-        
+        Connection postgresConnection = null;
+        Statement postgresStatement = null;
+        Connection clickhouseConnection = null;
+        Statement clickhouseStatement = null;
+
         System.out.println("---------- 💡 ETL Process Started 💡 ----------");
         try {
+            // I. Establish connections and begin transactions
+            // This is for make sure we can rollback if ETL failed
+            postgresConnection = DriverManager.getConnection(postgresUrl, postgresUser, postgresPassword);
+            postgresConnection.setAutoCommit(false); // Start transaction
+            postgresStatement = postgresConnection.createStatement();
+
+            clickhouseConnection = DriverManager.getConnection(clickhouseUrl, clickhouseUser, clickhousePassword);
+            clickhouseStatement = clickhouseConnection.createStatement();
+
+            // II. Get all table names in current OLTP database
             List<String> tableNames = ExtractFromPostgres.getTableNames(postgresUrl, postgresUser, postgresPassword);
 
             // Extract database name
@@ -133,7 +147,7 @@ public class ETLService {
             createLastExtractedTimeTable(postgresUrl, postgresUser, postgresPassword);
 
             for (String tableName : tableNames) {
-                // Pre ETL process: Handle deleted rows
+                // III. Pre ETL process: Handle deleted rows
                 GetDeletedRows.createTrigger(postgresUrl, postgresUser, postgresPassword, tableName);
                 List<Map<String, Object>> deletedRows = GetDeletedRows.getDeletedRows(postgresUrl, postgresUser, postgresPassword, tableName);
                 if (!deletedRows.isEmpty()) {
@@ -145,7 +159,7 @@ public class ETLService {
                     System.out.println("No deleted rows to process.");
                 }
 
-                // Main ETL process
+                // IV. Main ETL process
                 // Step 1: Extract data from PostgreSQL using provided credentials - incremental load
                 // 1.1: Check for a timestamp column
                 String timestampColumn = ExtractFromPostgres.checkTimestampColumn(postgresUrl, postgresUser, postgresPassword, tableName);
@@ -195,13 +209,26 @@ public class ETLService {
                 }
                 
             }
+            // V. Commit transactions
+            postgresConnection.commit();
+            System.out.println("PostgreSQL transaction committed.");
             System.out.println("---------- 💡 ETL Process Finished 💡 ----------");
             System.out.println("");
         } catch (Exception e) {
             e.printStackTrace();
+            try {
+                if (postgresConnection != null) postgresConnection.rollback();
+                System.out.println("PostgreSQL transaction rolled back.");
+            } catch (SQLException rollbackException) {
+                rollbackException.printStackTrace();
+            }
         } finally {
             try {
                 if (resultSet != null) resultSet.close();
+                if (postgresStatement != null) postgresStatement.close();
+                if (postgresConnection != null) postgresConnection.close();
+                if (clickhouseStatement != null) clickhouseStatement.close();
+                if (clickhouseConnection != null) clickhouseConnection.close();
             } catch (Exception e) {
                 e.printStackTrace();
             }
