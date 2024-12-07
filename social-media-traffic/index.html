@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Data Generator Control Panel</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      line-height: 1.6;
+    }
+    .container {
+      max-width: 600px;
+      margin: auto;
+    }
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+    label {
+      display: block;
+      margin-top: 10px;
+      font-weight: bold;
+    }
+    input[type="number"] {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      margin-bottom: 15px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+    button {
+      padding: 10px 20px;
+      background-color: #28a745;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:disabled {
+      background-color: #ccc;
+    }
+    button:hover {
+      background-color: #218838;
+    }
+    #status {
+      margin-top: 20px;
+      padding: 10px;
+      background-color: #f9f9f9;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Data Generator Control Panel</h1>
+
+    <form id="rangeForm">
+      <label for="userMin">User Min</label>
+      <input type="number" id="userMin" name="USER_MIN" min="1" required>
+      
+      <label for="userMax">User Max</label>
+      <input type="number" id="userMax" name="USER_MAX" min="1" required>
+
+      <label for="postMin">Post Min</label>
+      <input type="number" id="postMin" name="POST_MIN" min="1" required>
+
+      <label for="postMax">Post Max</label>
+      <input type="number" id="postMax" name="POST_MAX" min="1" required>
+
+      <label for="likeMin">Like Min</label>
+      <input type="number" id="likeMin" name="LIKE_MIN" min="1" required>
+
+      <label for="likeMax">Like Max</label>
+      <input type="number" id="likeMax" name="LIKE_MAX" min="1" required>
+
+      <button type="submit">Update Ranges</button>
+    </form>
+
+    <button id="toggleButton">Toggle Generation</button>
+
+    <div id="status">
+      <strong>Status:</strong>
+      <p id="generationStatus">Loading...</p>
+      <p id="ranges"></p>
+    </div>
+  </div>
+
+  <script>
+    const rangeForm = document.getElementById("rangeForm");
+    const toggleButton = document.getElementById("toggleButton");
+    const generationStatus = document.getElementById("generationStatus");
+    const rangesDisplay = document.getElementById("ranges");
+
+    // Fetch and display status
+    async function fetchStatus() {
+      const response = await fetch('/get_status');
+      const data = await response.json();
+      generationStatus.textContent = data.is_generating ? "Generating" : "Paused";
+      rangesDisplay.innerHTML = `
+        <strong>Ranges:</strong><br>
+        USER_MIN: ${data.ranges.USER_MIN}, USER_MAX: ${data.ranges.USER_MAX}<br>
+        POST_MIN: ${data.ranges.POST_MIN}, POST_MAX: ${data.ranges.POST_MAX}<br>
+        LIKE_MIN: ${data.ranges.LIKE_MIN}, LIKE_MAX: ${data.ranges.LIKE_MAX}
+      `;
+    }
+
+    // Submit updated ranges
+    rangeForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const formData = new FormData(rangeForm);
+      const data = {};
+      formData.forEach((value, key) => {
+        data[key] = parseInt(value);
+      });
+
+      await fetch('/update_ranges', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+
+      await fetchStatus();
+    });
+
+    // Toggle generation
+    toggleButton.addEventListener("click", async () => {
+      const isCurrentlyGenerating = generationStatus.textContent === "Generating";
+      await fetch('/toggle_generation', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ is_generating: !isCurrentlyGenerating })
+      });
+
+      await fetchStatus();
+    });
+
+    // Initial fetch
+    fetchStatus();
+  </script>
+</body>
+</html>
