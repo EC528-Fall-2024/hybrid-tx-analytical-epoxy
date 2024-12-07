@@ -45,7 +45,7 @@ public class LoadToClickHouse {
         statement.executeUpdate(createTableSQL);
         statement.executeUpdate("TRUNCATE TABLE " + databaseName + "." + tableName);
         
-        System.out.println("Database and table setup completed successfully for: {}", tableName);
+        System.out.println("Database: [" + databaseName + "], table: [" + tableName + "] checked/created.");
     }
 
     private static String buildCreateTableSQL(String databaseName, 
