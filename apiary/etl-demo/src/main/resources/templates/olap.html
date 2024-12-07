@@ -31,20 +31,30 @@
             text-align: center;
             /* display: none; */
         }
-
         .pagination button {
             margin: 0 10px;
             padding: 5px 15px;
             cursor: pointer;
         }
-
         .pagination span {
             margin: 0 10px;
+        }
+        .back-button {
+            padding: 8px 16px;
+            margin-bottom: 20px;
+            background-color: #f0f0f0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .back-button:hover {
+            background-color: #e0e0e0;
         }
     </style>
 </head>
 <body>
-
+    <button class="back-button" onclick="goBack()">Back</button>
+    
     <h1>Databases</h1>
     <ul id="databaseList"></ul>
 
@@ -72,6 +82,10 @@
     </div>
 
     <script>
+        function goBack() {
+            window.history.back();
+        }
+
         async function fetchDatabases() {
             try {
                 const response = await fetch('/get-databases'); // Adjust the endpoint based on your API
@@ -118,12 +132,12 @@
                 if (!response.ok) {
                     throw new Error('Network response was not ok');
                 }
-                
+
                 const contents = await response.json();
                 const columnNames = Object.keys(contents);
                 const numRows = contents[columnNames[0]].length;
                 const totalPages = Math.ceil(numRows / pageSize);
-        
+
                 // Calculate start and end indices for current page
                 const startIdx = (page - 1) * pageSize;
                 const endIdx = Math.min(startIdx + pageSize, numRows);
@@ -146,7 +160,7 @@
                 for (let i = startIdx; i < endIdx; i++) {
                     const rowElement = document.createElement('tr');
                     const rowValues = [];
-                    
+
                     columnNames.forEach(column => {
                         const cell = document.createElement('td');
                         cell.textContent = contents[column][i];
@@ -156,13 +170,13 @@
                             rowValues.push(numValue);
                         }
                     });
-                    
+
                     if (rowValues.length > 0) {
                         rowsData.push(rowValues);
                     }
                     list.appendChild(rowElement);
                 }
-                
+
                 // Update pagination controls
                 const paginationDiv = document.getElementById('pagination');
                 paginationDiv.innerHTML = ''; // Clear existing controls
