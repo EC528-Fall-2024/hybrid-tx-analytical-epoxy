@@ -103,6 +103,8 @@ public class LoadToClickHouse {
                             String formattedDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
                                 .format(value);
                             valuesStr.append(",'").append(formattedDate).append("'");
+                        } else if (value instanceof Number) {
+                            valuesStr.append(",").append(value);
                         } else {
                             valuesStr.append(",'").append(value).append("'");
                         }
