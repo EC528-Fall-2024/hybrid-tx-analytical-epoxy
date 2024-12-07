@@ -11,7 +11,7 @@ DB_CONFIG = {
     'dbname': 'social_media',
     'user': 'postgres',
     'password': 'dbos',  # Replace with your actual password
-    'host': 'localhost',  # Change to your database host
+    'host': 'host.docker.internal',  # Change to your database host
     'port': 5432  # Default PostgreSQL port
 }
 
@@ -142,4 +142,4 @@ thread.start()
 
 # Run Flask webserver
 if __name__ == "__main__":
-    app.run(port=5000)
+    app.run(host='0.0.0.0', port=5001)
