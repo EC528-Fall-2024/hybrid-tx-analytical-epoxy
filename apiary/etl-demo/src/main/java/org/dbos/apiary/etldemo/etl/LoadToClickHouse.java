@@ -2,36 +2,142 @@ package org.dbos.apiary.etldemo.etl;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-// import java.sql.ResultSet;
 import java.sql.Statement;
-
 import java.text.SimpleDateFormat;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 import java.util.ArrayList;
-
+import java.util.StringJoiner;
 
 public class LoadToClickHouse {
+    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    private static final int BATCH_SIZE = 1000; // Configurable batch size for better performance
 
-    // Helper function returning SQL command for creating desired table
-    public static StringBuilder generateFeatures(int rowCount, String databaseName) {
-        // Start building the SQL query
-        StringBuilder generatedFeatures = new StringBuilder();
-
-        // Dynamically add 'row_i' columns based on the number of rows
-        for (int i = 1; i <= rowCount; i++) {
-            generatedFeatures.append("row_").append(i).append(" String, ");
+    public static void loadData(List<Map<String, List<Object>>> transformedData,
+                              String clickhouseUrl, 
+                              String clickhouseUser, 
+                              String clickhousePassword,
+                              String tableName, 
+                              String databaseName) {
+        if (transformedData == null || transformedData.isEmpty()) {
+            throw new IllegalArgumentException("Transformed data cannot be null or empty");
         }
-    
-        // Remove the trailing comma and space
-        generatedFeatures.setLength(generatedFeatures.length() - 2);
-        
-        return generatedFeatures;
+
+        try (Connection clickhouseConn = DriverManager.getConnection(clickhouseUrl, clickhouseUser, clickhousePassword);
+             Statement statement = clickhouseConn.createStatement()) {
+            
+            setupDatabase(statement, databaseName, tableName, transformedData.get(0));
+            insertData(statement, databaseName, tableName, transformedData);
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to load data to ClickHouse", e);
+        }
     }
 
-    // Helper function to determine ClickHouse data types
+    private static void setupDatabase(Statement statement, 
+                                    String databaseName, 
+                                    String tableName,
+                                    Map<String, List<Object>> firstRow) throws SQLException {
+        statement.executeUpdate("CREATE DATABASE IF NOT EXISTS " + databaseName);
+
+        String createTableSQL = buildCreateTableSQL(databaseName, tableName, firstRow);
+        statement.executeUpdate(createTableSQL);
+        statement.executeUpdate("TRUNCATE TABLE " + databaseName + "." + tableName);
+        
+        System.out.println("Database and table setup completed successfully for: {}", tableName);
+    }
+
+    private static String buildCreateTableSQL(String databaseName, 
+                                            String tableName,
+                                            Map<String, List<Object>> firstRow) {
+        StringJoiner columnDefs = new StringJoiner(", ");
+        
+        for (String columnName : firstRow.keySet()) {
+            Object sampleValue = firstRow.get(columnName).get(0);
+            String dataType = getClickHouseType(sampleValue);
+            columnDefs.add(columnName + " " + dataType);
+        }
+
+        return String.format("CREATE TABLE IF NOT EXISTS %s.%s (%s) ENGINE = MergeTree() ORDER BY tuple()",
+                           databaseName, tableName, columnDefs.toString());
+    }
+
+    private static void insertData(Statement statement, 
+                                 String databaseName,
+                                 String tableName,
+                                 List<Map<String, List<Object>>> transformedData) throws SQLException {
+        List<String> columnNames = new ArrayList<>(transformedData.get(0).keySet());
+        StringBuilder baseInsertQuery = new StringBuilder()
+            .append("INSERT INTO ")
+            .append(databaseName)
+            .append(".")
+            .append(tableName)
+            .append(" (")
+            .append(String.join(", ", columnNames))
+            .append(") VALUES ");
+
+        int batchCount = 0;
+        StringBuilder batchValues = new StringBuilder();
+
+        for (Map<String, List<Object>> dataMap : transformedData) {
+            List<Object> firstColumnValues = dataMap.get(columnNames.get(0));
+            
+            for (int row = 0; row < firstColumnValues.size(); row++) {
+                if (batchCount > 0) {
+                    batchValues.append(", ");
+                }
+                
+                appendRowValues(batchValues, dataMap, columnNames, row);
+                batchCount++;
+
+                if (batchCount >= BATCH_SIZE) {
+                    executeBatch(statement, baseInsertQuery.toString(), batchValues.toString());
+                    batchValues = new StringBuilder();
+                    batchCount = 0;
+                }
+            }
+        }
+
+        // Insert remaining records
+        if (batchCount > 0) {
+            executeBatch(statement, baseInsertQuery.toString(), batchValues.toString());
+        }
+    }
+
+    private static void appendRowValues(StringBuilder builder,
+                                      Map<String, List<Object>> dataMap,
+                                      List<String> columnNames,
+                                      int row) {
+        StringJoiner values = new StringJoiner(", ", "(", ")");
+        
+        for (String columnName : columnNames) {
+            Object value = dataMap.get(columnName).get(row);
+            values.add(formatValue(value));
+        }
+        
+        builder.append(values.toString());
+    }
+
+    private static String formatValue(Object value) {
+        if (value == null) {
+            return "NULL";
+        }
+        if (value instanceof Number) {
+            return "'" + value + "'";
+        }
+        if (value instanceof java.sql.Timestamp || value instanceof java.util.Date) {
+            return "'" + DATE_FORMAT.format(value) + "'";
+        }
+        return "'" + value.toString().replace("'", "\\'") + "'";
+    }
+
+    private static void executeBatch(Statement statement, 
+                                   String baseQuery, 
+                                   String values) throws SQLException {
+        statement.execute(baseQuery + values);
+    }
+
     private static String getClickHouseType(Object value) {
         if (value == null) return "String";
         
@@ -43,98 +149,6 @@ public class LoadToClickHouse {
         if (value instanceof java.sql.Timestamp 
             || value instanceof java.util.Date) return "DateTime";
         
-        // Default to String for unknown types
         return "String";
-    }
-
-    // ClickHouse connection parameters
-    // private static final String CLICKHOUSE_URL = "jdbc:clickhouse://localhost:8123";
-    // private static final String CLICKHOUSE_USER = "default";
-    // private static final String CLICKHOUSE_PASSWORD = "";
-
-    public static void loadData(List<Map<String, List<Object>>> transformedData,
-                          String clickhouseUrl, String clickhouseUser, String clickhousePassword,
-                          String tableName, String databaseName) {
-        try (Connection clickhouseConn = DriverManager.getConnection(clickhouseUrl, clickhouseUser, clickhousePassword);
-            Statement statement = clickhouseConn.createStatement()) {
-            
-            System.out.println("Connected to ClickHouse!");
-            // System.out.println("data: " + transformedData);
-            
-            // Create database
-            statement.executeUpdate("CREATE DATABASE IF NOT EXISTS " + databaseName);
-
-            // Get the first row to analyze structure and number of columns
-            Map<String, List<Object>> firstRow = transformedData.get(0);
-            List<String> columnNames = new ArrayList<>(firstRow.keySet());
-            int numRows = firstRow.values().iterator().next().size();
-
-            // Create table dynamically with numbered columns
-            StringBuilder createTableSQL = new StringBuilder(
-                "CREATE TABLE IF NOT EXISTS " + databaseName + "." + tableName + " (");
-
-            for (int i = 0; i < columnNames.size(); i++) {
-                if (i > 0) {
-                    createTableSQL.append(", ");
-                }
-                createTableSQL.append(columnNames.get(i)).append(" String");
-            }
-            
-            createTableSQL.append(") ENGINE = MergeTree() ORDER BY tuple()");
-            statement.executeUpdate(createTableSQL.toString());
-
-            statement.executeUpdate("TRUNCATE TABLE " + databaseName + "." + tableName);
-            
-            System.out.println("Database: [" + databaseName + "], table: [" + tableName + "] checked/created.");
-        
-            // Prepare insert query
-            StringBuilder insertQuery = new StringBuilder();
-            insertQuery.append("INSERT INTO ")
-                      .append(databaseName)
-                      .append(".")
-                      .append(tableName)
-                      .append(" (")
-                      .append(String.join(", ", columnNames))
-                      .append(") VALUES ");
-
-            // Insert data row by row
-            for (Map<String, List<Object>> dataMap : transformedData) {
-                List<Object> firstColumnValues = dataMap.get(columnNames.get(0));
-                int rowCount = firstColumnValues.size();
-                
-                for (int row = 0; row < rowCount; row++) {
-                    if (row > 0 || transformedData.indexOf(dataMap) > 0) {
-                        insertQuery.append(", ");
-                    }
-                    
-                    insertQuery.append("(");
-                    for (int col = 0; col < columnNames.size(); col++) {
-                        if (col > 0) {
-                            insertQuery.append(", ");
-                        }
-                        Object value = dataMap.get(columnNames.get(col)).get(row);
-                        
-                        if (value == null) {
-                            insertQuery.append("NULL");
-                        } else if (value instanceof Number) {
-                            insertQuery.append("'" + value + "'");
-                        } else if (value instanceof java.sql.Timestamp || value instanceof java.util.Date) {
-                            String formattedDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
-                                .format(value);
-                            insertQuery.append("'" + formattedDate + "'");
-                        } else {
-                            insertQuery.append("'" + value.toString().replace("'", "\\'") + "'");
-                        }
-                    }
-                    insertQuery.append(")");
-                }
-            }
-
-            statement.execute(insertQuery.toString());
-            System.out.println("Data successfully inserted into ClickHouse.");
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
     }
 }
