@@ -3,6 +3,9 @@ apiary/target/
 apiary/etl-demo/target/
 apiary/etl-demo/target 2/
 apiary/postgres-demo/target/
+apiary/sql/dummy-data/likes.csv
+apiary/sql/dummy-data/posts.csv
+apiary/sql/dummy-data/users.csv
 
 # Additional common Java/Maven ignores
 *.class
