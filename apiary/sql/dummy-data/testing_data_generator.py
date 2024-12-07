@@ -8,6 +8,7 @@ def random_date(start, end):
 # Generate Users data
 num_users = 50000
 users = []
+print("Generating 'Users'")
 for user_id in range(1, num_users + 1):
     users.append({
         'user_id': user_id,
@@ -19,6 +20,7 @@ for user_id in range(1, num_users + 1):
 # Generate Posts data
 num_posts = 100000
 posts = []
+print("Generating 'Posts'")
 for post_id in range(1, num_posts + 1):
     posts.append({
         'post_id': post_id,
@@ -30,6 +32,7 @@ for post_id in range(1, num_posts + 1):
 # Generate Likes data
 num_likes = 200000
 likes = []
+print("Generating 'Likes'")
 for like_id in range(1, num_likes + 1):
     likes.append({
         'like_id': like_id,
