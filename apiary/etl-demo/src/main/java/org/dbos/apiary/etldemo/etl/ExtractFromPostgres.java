@@ -24,9 +24,9 @@ public class ExtractFromPostgres {
         List<String> tableNames = new ArrayList<>();
         try {
             connection = DriverManager.getConnection(postgresUrl, postgresUser, postgresPassword);
-            System.out.println("Connected to PostgreSQL!");
+            // System.out.println("Connected to PostgreSQL!");
 
-            String tableQuery = "SELECT table_name FROM information_schema.tables WHERE table_type = 'BASE TABLE' AND table_schema NOT IN ('pg_catalog', 'information_schema') AND table_name != 'last_extracted_time' ORDER BY table_name;";
+            String tableQuery = "SELECT table_name FROM information_schema.tables WHERE table_type = 'BASE TABLE' AND table_schema NOT IN ('pg_catalog', 'information_schema') AND table_name != 'last_extracted_time' AND table_name != 'deleted_rows' ORDER BY table_name;";
             statement = connection.createStatement();
             resultSet = statement.executeQuery(tableQuery);
 
@@ -49,7 +49,7 @@ public class ExtractFromPostgres {
 
         try {
             connection = DriverManager.getConnection(postgresUrl, postgresUser, postgresPassword);
-            System.out.println("Connected to PostgreSQL!");
+            // System.out.println("Connected to PostgreSQL!");
 
             // Query to check for columns with a timestamp type
             String query = "SELECT column_name " +
@@ -81,7 +81,7 @@ public class ExtractFromPostgres {
 
         try {
             connection = DriverManager.getConnection(postgresUrl, postgresUser, postgresPassword);
-            System.out.println("Connected to PostgreSQL!");
+            // System.out.println("Connected to PostgreSQL!");
             
             // Add a new timestamp column and set its default value to current time
             String alterTableQuery = "ALTER TABLE " + table + " ADD COLUMN updated_at TIMESTAMP DEFAULT current_timestamp";
@@ -101,18 +101,18 @@ public class ExtractFromPostgres {
     }
 
     public static ResultSet extractData(String postgresUrl, String postgresUser, String postgresPassword, String table,
-                                        String timestampColumn, String lastExtractedTime) {
+                                        String timestampColumn, String lastExtractedTime, String loadtype) {
         Connection connection = null;
         Statement statement = null;
         ResultSet resultSet = null;
 
         try {
             connection = DriverManager.getConnection(postgresUrl, postgresUser, postgresPassword);
-            System.out.println("Connected to PostgreSQL!");
+            // System.out.println("Connected to PostgreSQL!");
 
             statement = connection.createStatement();
             String query;
-            if (timestampColumn == null || lastExtractedTime == null) {
+            if (timestampColumn == null || lastExtractedTime == null || loadtype == "full") {
                 query = "SELECT * FROM " + table;
             } else {
                 query = "SELECT * FROM " + table + " WHERE " + timestampColumn + " > '" + lastExtractedTime + "'";

@@ -19,7 +19,7 @@ public class ETLService {
         try {
             // Connect to the PostgreSQL database
             connection = DriverManager.getConnection(postgresUrl, postgresUser, postgresPassword);
-            // System.out.println("Connected to PostgreSQL!");
+            System.out.println("Connected to PostgreSQL!");
 
             // Define the CREATE TABLE IF NOT EXISTS query
             String createTableQuery = "CREATE TABLE IF NOT EXISTS last_extracted_time (" +
@@ -100,11 +100,27 @@ public class ETLService {
         }
     }
 
+    public static boolean checkOLAPTableExists(String clickhouseUrl, String clickhouseUser, String clickhousePassword, String databaseName, String tableName) {
+        try (Connection connection = DriverManager.getConnection(clickhouseUrl, clickhouseUser, clickhousePassword);
+             Statement statement = connection.createStatement()) {
+            
+            String query = "EXISTS TABLE " + databaseName + "." + tableName;
+            ResultSet resultSet = statement.executeQuery(query);
+            if (resultSet.next()) {
+                return resultSet.getBoolean(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
 
     public void runETL(String postgresUrl, String postgresUser, String postgresPassword, 
                        String clickhouseUrl, String clickhouseUser, String clickhousePassword) {
         ResultSet resultSet = null;
-
+        
+        System.out.println("---------- 💡 ETL Process Started 💡 ----------");
         try {
             List<String> tableNames = ExtractFromPostgres.getTableNames(postgresUrl, postgresUser, postgresPassword);
 
@@ -135,17 +151,31 @@ public class ETLService {
                 String timestampColumn = ExtractFromPostgres.checkTimestampColumn(postgresUrl, postgresUser, postgresPassword, tableName);
                 String lastExtractedTime = getLastExtractedTime(postgresUrl, postgresUser, postgresPassword, tableName);
                 
-                resultSet = ExtractFromPostgres.extractData(postgresUrl, postgresUser, postgresPassword, tableName, timestampColumn, lastExtractedTime);
+                // Check if OLAP db has been accidentally deleted
+                boolean olapTableExists = checkOLAPTableExists(clickhouseUrl, clickhouseUser, clickhousePassword, databaseName, tableName);
+                String loadtype = "";
 
+                
+                if (!olapTableExists) {
+                    loadtype = "full";
+                }
+
+                resultSet = ExtractFromPostgres.extractData(postgresUrl, postgresUser, postgresPassword, tableName, timestampColumn, lastExtractedTime, loadtype);
+
+                
                 if (timestampColumn == null) {
                     // If no timestamp column exists, extract everything and add a timestamp column
                     System.out.println("No timestamp column found. Extracting all rows...");
-
+                    
                     // Add a timestamp column for future tracking
                     ExtractFromPostgres.addTimestampColumn(postgresUrl, postgresUser, postgresPassword, tableName);
                 } else {
                     // If a timestamp column exists, extract rows based on the timestamp
                     System.out.println("Timestamp column found: " + timestampColumn);
+
+                    if (loadtype == "full") {
+                        System.out.println("OLAP database might be accidentally dropped. Performing full load...");
+                    }
                 }
 
                 // Update last extract time
@@ -165,6 +195,8 @@ public class ETLService {
                 }
                 
             }
+            System.out.println("---------- 💡 ETL Process Finished 💡 ----------");
+            System.out.println("");
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
