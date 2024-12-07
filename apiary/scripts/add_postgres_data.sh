@@ -16,8 +16,14 @@ docker cp $LIKES_CSV $CONTAINER_ID:/likes.csv
 # Create and populate tables
 docker exec -i $CONTAINER_ID psql -U postgres << EOF
 
+DROP DATABASE IF EXISTS social_media;
 CREATE DATABASE social_media;
 \c social_media
+
+-- Drop existing tables in correct order (due to foreign key constraints)
+DROP TABLE IF EXISTS likes;
+DROP TABLE IF EXISTS posts;
+DROP TABLE IF EXISTS users;
 
 -- Create users table
 CREATE TABLE users (
@@ -27,6 +33,9 @@ CREATE TABLE users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Sleep for 1 second to ensure table creation is complete
+SELECT pg_sleep(1);
+
 -- Create posts table
 CREATE TABLE posts (
     post_id SERIAL PRIMARY KEY,
@@ -35,6 +44,9 @@ CREATE TABLE posts (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Sleep for 1 second to ensure table creation is complete
+SELECT pg_sleep(1);
+
 -- Create likes table
 CREATE TABLE likes (
     like_id SERIAL PRIMARY KEY,
@@ -42,6 +54,9 @@ CREATE TABLE likes (
     post_id INTEGER REFERENCES posts(post_id),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+-- Sleep for 1 second to ensure table creation is complete
+SELECT pg_sleep(1);
 
 -- Copy data from CSV files
 COPY users(user_id, username, email, created_at)
@@ -60,3 +75,7 @@ DELIMITER ','
 CSV HEADER;
 
 EOF
+
+# Sleep for 3 seconds after completion
+sleep 3
+echo "Database setup complete!"

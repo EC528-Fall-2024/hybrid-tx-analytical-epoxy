@@ -6,7 +6,7 @@ def random_date(start, end):
     return start + timedelta(seconds=random.randint(0, int((end - start).total_seconds())))
 
 # Generate Users data
-num_users = 500
+num_users = 50000
 users = []
 for user_id in range(1, num_users + 1):
     users.append({
@@ -17,7 +17,7 @@ for user_id in range(1, num_users + 1):
     })
 
 # Generate Posts data
-num_posts = 1000
+num_posts = 100000
 posts = []
 for post_id in range(1, num_posts + 1):
     posts.append({
@@ -28,7 +28,7 @@ for post_id in range(1, num_posts + 1):
     })
 
 # Generate Likes data
-num_likes = 2000
+num_likes = 200000
 likes = []
 for like_id in range(1, num_likes + 1):
     likes.append({
