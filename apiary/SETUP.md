@@ -47,6 +47,24 @@ mvn test
 ```
 All should pass.
 
+## Add SQL Data to Postgres
+
+We have created three tables (`users`, `posts`, and `likes`) with dummy data to show an example of our epoxy being used on a mock social media application. Here is how to add this data to the docker file:
+
+1. Ensure your docker file is initialized and running. To see if it is, you can run the Docker app or check on cli.
+
+    ```
+    docker ps
+    ```
+
+2. Run the `add_postgres_data.sh` file.
+
+    ```
+    scripts/add_postgres_data.sh
+    ```
+
+And you're done! You are now able to run the etl-demo on this propogated dummy data.
+
 
 ## Elasticsearch
 
