@@ -193,7 +193,6 @@ public class LoadToClickHouse {
             if (resultSet.next()) {
                 primaryKey = resultSet.getString("column_name");
             }
-            System.out.println("in table" + tableName+ ", pk is: " + primaryKey);
         } finally {
             // Close resources
             if (resultSet != null) resultSet.close();
