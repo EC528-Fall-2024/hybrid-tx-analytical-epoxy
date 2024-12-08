@@ -13,7 +13,7 @@ import java.util.StringJoiner;
 
 public class LoadToClickHouse {
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-    private static final int BATCH_SIZE = 1000;
+    private static final int BATCH_SIZE = 1000; // Configurable batch size for better performance
 
     public static void loadData(List<Map<String, List<Object>>> transformedData,
                               String clickhouseUrl, 
@@ -31,6 +31,7 @@ public class LoadToClickHouse {
             
             setupDatabase(statement, databaseName, tableName, transformedData.get(0), primaryKey);
             insertData(statement, databaseName, tableName, transformedData);
+            optimizeTable(statement, databaseName, tableName);
 
         } catch (SQLException e) {
             throw new RuntimeException("Failed to load data to ClickHouse", e);
@@ -200,5 +201,15 @@ public class LoadToClickHouse {
             if (connection != null) connection.close();
         }
         return primaryKey;
+    }
+
+    public static void optimizeTable(Statement statement, String databaseName, String tableName) {
+        String optimizeSQL = "OPTIMIZE TABLE " + databaseName + "." + tableName + " FINAL";
+        try {
+            statement.execute(optimizeSQL);
+            System.out.println("Optimization completed for table: " + tableName);
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to optimize table: " + tableName, e);
+        }
     }
 }
