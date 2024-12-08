@@ -8,7 +8,6 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class GetDeletedRows {
 
@@ -62,10 +61,10 @@ public class GetDeletedRows {
                 // Trigger doesn't exist, so create it
                 statement.executeUpdate(createTrigger);
             } else {
-                System.out.println("Trigger already exists, reusing it.");
+                System.out.println("DELETE Trigger already exists, reusing it.");
             }
 
-            System.out.println("Trigger created successfully for table: " + table);
+            System.out.println("DELETE Trigger created successfully for table: " + table);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -115,26 +114,55 @@ public class GetDeletedRows {
     }
 
     // Function to delete rows in OLTP database's corresponding table
-    public static void deleteFromOLAP(String clickhouseUrl, String clickhouseUser, String clickhousePassword, String table, List<Map<String, Object>> deletedRows) {
+    public static void deleteFromOLAP(String clickhouseUrl, 
+                                    String clickhouseUser, 
+                                    String clickhousePassword, 
+                                    String table, 
+                                    String databaseName,
+                                    List<Map<String, Object>> deletedRows) {
         Connection connection = null;
         Statement statement = null;
     
         try {
             connection = DriverManager.getConnection(clickhouseUrl, clickhouseUser, clickhousePassword);
-            System.out.println("Connected to ClickHouse!");
+            // System.out.println("Connected to ClickHouse!");
+            statement = connection.createStatement();
 
-            // Convert row data to column data. i.e. we perform transform to the deleted rows
-            List<String> columnsToDelete = deletedRows.stream()
-                                                        .map(row -> (String) row.get("table_name"))
-                                                        .filter(columnName -> columnName != null) // Filter out any nulls
-                                                        .collect(Collectors.toList());
+            for (Map<String, Object> rowData : deletedRows) {
+                // Construct the WHERE clause dynamically
+                StringBuilder whereClause = new StringBuilder();
+                for (Map.Entry<String, Object> entry : rowData.entrySet()) {
+                    // Skip the "updated_at" column
+                    if ("updated_at".equals(entry.getKey())) {
+                        continue;
+                    }
+
+                    if (whereClause.length() > 0) {
+                        whereClause.append(" AND ");
+                    }
+                    if (entry.getValue() instanceof String) {
+                        whereClause.append(entry.getKey())
+                                .append(" = '")
+                                .append(entry.getValue().toString().replace("'", "\\'"))
+                                .append("'");
+                    } else {
+                        whereClause.append(entry.getKey())
+                                .append(" = ")
+                                .append(entry.getValue());
+                    }
+                }
     
-            for (String column : columnsToDelete) {
-                String query = "ALTER TABLE " + table + " DROP COLUMN IF EXISTS `" + column + "`";
-                statement = connection.createStatement();
-                statement.executeUpdate(query);
-                System.out.println("Deleted column from OLAP: " + column);
+                // Construct the DELETE query
+                String deleteQuery = String.format(
+                    "ALTER TABLE %s.%s DELETE WHERE %s",
+                    databaseName, table, whereClause.toString()
+                );
+                
+                // Execute the DELETE query
+                System.out.println("Executing: " + deleteQuery);
+                statement.execute(deleteQuery);
             }
+            System.out.println("Deleted rows from ClickHouse table.");
         } catch (Exception e) {
             e.printStackTrace();
         } finally {

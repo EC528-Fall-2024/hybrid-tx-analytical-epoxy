@@ -144,7 +144,7 @@ public class ETLService {
            resultSet.close();
    
            if (triggerExists) {
-               System.out.println("Trigger already exists for table: " + tableName + ". Reusing old trigger.");
+               System.out.println("INSERT/ UPDATE Trigger already exists for table: " + tableName + ". Reusing old trigger.");
            } else {
                // Create the trigger function if it doesn't exist
                statement.execute(triggerFunction);
@@ -152,7 +152,7 @@ public class ETLService {
                // Create the trigger for the specific table
                statement.execute(createTrigger);
    
-               System.out.println("Trigger created successfully for table: " + tableName);
+               System.out.println("\"INSERT/ UPDATE Trigger created successfully for table: " + tableName);
            }
        } catch (SQLException e) {
            System.err.println("Error ensuring trigger for table: " + tableName);
@@ -196,12 +196,15 @@ public class ETLService {
                 // Make sure we have trigger for detecting UPDATE and INSERT
                 createUpdateTrigger(postgresUrl, postgresUser, postgresPassword, tableName);
 
+                // Get primary key of current table to avoid OLAP duplicate update
+                String primaryKey = LoadToClickHouse.getPrimaryKey(postgresUrl, postgresUser, postgresPassword, tableName);
+
                 // III. Pre ETL process: Handle deleted rows
                 GetDeletedRows.createTrigger(postgresUrl, postgresUser, postgresPassword, tableName);
                 List<Map<String, Object>> deletedRows = GetDeletedRows.getDeletedRows(postgresUrl, postgresUser, postgresPassword, tableName);
                 if (!deletedRows.isEmpty()) {
                     // When there are rows deleted since last ETL
-                    GetDeletedRows.deleteFromOLAP(clickhouseUrl, clickhouseUser, clickhousePassword, tableName, deletedRows);
+                    GetDeletedRows.deleteFromOLAP(clickhouseUrl, clickhouseUser, clickhousePassword, tableName, databaseName, deletedRows);
                     GetDeletedRows.clearProcessedDeletions(postgresUrl, postgresUser, postgresPassword, tableName);
                     System.out.println("Deleted rows synchronized.");
                 } else {
@@ -244,9 +247,7 @@ public class ETLService {
                 // Update last extract time
                 updateLastExtractedTime(postgresUrl, postgresUser, postgresPassword, tableName);
 
-                // Get primary key of current table to avoid OLAP duplicate update
-                String primaryKey = LoadToClickHouse.getPrimaryKey(postgresUrl, postgresUser, postgresPassword, tableName);
-
+                
                 // Only perform transform and load if we attracted data
                 if (resultSet != null && resultSet.isBeforeFirst()) {
                     // Step 2: Transform data from column-based to row-based
