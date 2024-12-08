@@ -50,13 +50,13 @@ This should compile the system and a simple webpage built with Spring Boot will 
 
 For more detailed instructions and function explanation, please check [etl-demo_readme](https://github.com/EC528-Fall-2024/hybrid-tx-analytical-epoxy/tree/main/apiary/etl-demo)
 
-To generate this mock data go back to the sql folder in root and run the python script to generate mock data. Then, go back to the scripts folder in root and run `add_postgres_data.sh` to automatically add this mock data into the PostgreSQL database.
+To generate this mock data go back to the sql folder in root and run the python script to generate mock data. Then, go back to the scripts folder in root and run `add_postgres_data.sh` to automatically add this mock data into the PostgreSQL database. For more detailed instructions, check out the [SETUP.md](https://github.com/EC528-Fall-2024/hybrid-tx-analytical-epoxy/blob/main/apiary/SETUP.md).
 
 ```shell
-cd ../sql
+cd ../sql/dummy-data
 python3 testing_data_generator.py
 
-cd ../scripts
+cd ../../scripts
 ./add_postgres_data.sh
 
 ```
