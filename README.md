@@ -16,7 +16,63 @@
 | -------------- | ------------------ |
 | Dan Lambridght | dlambrig@gmail.com |
 | Orran Krieger  | okrieg@bu.edu      |
-| Ata Turk       | ataturk@bu.edu     |
+| Ata Turk       | ataturk@bu.edu     
+
+## Instructions
+
+To install and run locally, ensure you have the dependencies:
+
+```shell
+sudo apt install openjdk-11-jdk maven libatomic1
+```
+
+Begin by first initializing Postgres + ClickHouse docker image. It is recommended to configure Docker so it can be run by non-root users.
+
+```shell
+scripts/initialize_postgres_docker.sh
+scripts/initialize_clickhouse_docker.sh
+```
+
+Once the Docker containers have been initialized, ensure that they are up and running with:
+
+```shell
+docker ps
+```
+
+Now let's compile our HTAP system and use ETL!
+
+```shell
+cd etl-demo
+mvn clean && mvn package && mvn spring-boot:run
+```
+
+This should compile the system and a simple webpage built with Spring Boot will be hosted on `localhost:8081`. By visiting the webpage, you can see all of the parameters required to trigger the ETL process between the OLTP PostgreSQL and the OLAP ClickHouse database. Before starting the ETL process between the two databases, we need to first have data in the OLTP database to transfer over to the OLAP database! We compiled a quick method to generate mock "social media" data to trigger the ETL and observe the functionality of our program.
+
+To generate this mock data go back to the sql folder in root and run the python script to generate mock data. Then, go back to the scripts folder in root and run `add_postgres_data.sh` to automatically add this mock data into the PostgreSQL database.
+
+```shell
+cd ../sql
+python3 testing_data_generator.py
+
+cd ../scripts
+./add_postgres_data.sh
+
+```
+
+Now that we have mock data in PostgreSQL, we can trigger an ETL process to the OLAP ClickHouse database.
+
+- OLTP Database URL: `jdbc:postgresql://localhost:5432/social_media`
+- OLTP Username: `postgres`
+- OLTP Password: `dbos`
+- OLAP Database URL: `jdbc:clickhouse://localhost:8123`
+- OLAP Username: `default`
+- OLAP Password: (left empty)
+
+Click `Start ETL`! This will finally begin the ETL process. Once the ETL process begins, it will continue processing ETL batches every 10 minutes until prompted to stop. You can view the OLAP ClickHouse database directly by clicking `OLAP Database`. You can observe all rows in each tables in each database in ClickHouse.
+
+ETL will only occur to newly added/changed data, so when ETL is started again, only new/changed data will be updated to the OLAP database, enhancing our ETL performance and speed.
+
+You can also try our HTAP program [here](https://etl-service-hybrid-tx-analytical-epoxy-31f481.apps.shift.nerc.mghpcc.org) hosted on MOC NERC.
 
 ## 0. Introduction to Epoxy
 
