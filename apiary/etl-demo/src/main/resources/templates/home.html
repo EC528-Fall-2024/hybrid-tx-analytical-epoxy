@@ -54,10 +54,46 @@
             const clickhouseUser = document.getElementById('clickhouseUser').value;
             const clickhousePassword = document.getElementById('clickhousePassword').value;
 
+            startTime = performance.now();
+
             document.getElementById('notification').innerText = 'ETL Process Started...';
 
             // Call the ETL endpoint via a fetch request, sending the connection details
             fetch('/start-etl', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    postgresUrl,
+                    postgresUser,
+                    postgresPassword,
+                    clickhouseUrl,
+                    clickhouseUser,
+                    clickhousePassword
+                })
+            })
+                .then(response => response.text())
+                .then(message => {
+                    const endTime = performance.now();
+                    document.getElementById('notification').innerHTML = `${message}<br>
+                    <strong>Execution Time:</strong> ${(endTime - startTime).toFixed(2)} ms<br>`;
+                })
+                .catch(error => {
+                    document.getElementById('notification').innerText = `Error: ${error}<br>`;
+                });
+        }
+
+        function startBatching() {
+            const postgresUrl = document.getElementById('postgresUrl').value;
+            const postgresUser = document.getElementById('postgresUser').value;
+            const postgresPassword = document.getElementById('postgresPassword').value;
+            const clickhouseUrl = document.getElementById('clickhouseUrl').value;
+            const clickhouseUser = document.getElementById('clickhouseUser').value;
+            const clickhousePassword = document.getElementById('clickhousePassword').value;
+
+            document.getElementById('notification').innerText = 'ETL Process Started...';
+
+            // Call the ETL endpoint via a fetch request, sending the connection details
+            fetch('/start-batching', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -77,9 +113,63 @@
                     document.getElementById('notification').innerText = `Error: ${error}<br>`;
                 });
         }
+
+        function StopBatching() {
+            fetch('/stop-batching', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+                .then(response => response.text())
+                .then(message => {
+                    document.getElementById('notification').innerHTML = `${message}<br>`;
+                })
+                .catch(error => {
+                    document.getElementById('notification').innerText = `Error: ${error}<br>`;
+                });
+        }
         
         function startOLAP() {
             window.location.href = 'olap';
+        }
+
+        let tableCheckInterval;
+
+        function startTableLengthCheck() {
+            // Initial check
+            getTableLength();
+            
+            // Set up interval to check every 5 seconds
+            tableCheckInterval = setInterval(() => {
+                getTableLength();
+            }, 5000);
+        }
+
+        function stopTableLengthCheck() {
+            clearInterval(tableCheckInterval);
+        }
+
+        function getTableLength() {
+            fetch('/get-table-length', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    postgresUrl: "your_postgres_url",
+                    postgresUser: "your_postgres_user",
+                    postgresPassword: "your_postgres_password"
+                })
+            })
+            .then(response => response.text())
+            .then(message => {
+                document.getElementById('table-length').innerHTML = message.split('\n').join('<br>');
+            })
+            .catch(error => {
+                document.getElementById('table-length').innerHTML = 
+                    `<span style="color: red">Error: ${error}</span>`;
+            });
         }
     </script>
 </head>
@@ -107,10 +197,17 @@
         </div>
         <div class="button-container">
             <button onclick="startETL()">Start ETL</button>
+            <button onclick="startBatching()">Start Batching</button>
+            <button onclick="StopBatching()">Stop Batching</button>
             <button onclick="startOLAP()">OLAP Database</button>
         </div>
         <!-- Notification area to display success or error message -->
         <p id="notification"></p>
+        <div class="monitoring-controls">
+            <button onclick="startTableLengthCheck()">Start Monitoring</button>
+            <button onclick="stopTableLengthCheck()">Stop Monitoring</button>
+            <div id="table-length" style="font-family: monospace; margin-top: 10px;"></div>
+        </div>
     </div>
 </body>
 </html>
