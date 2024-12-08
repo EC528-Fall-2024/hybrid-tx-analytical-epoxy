@@ -115,6 +115,52 @@ public class ETLService {
         return false;
     }
 
+    public static void createUpdateTrigger(String postgresUrl, String postgresUser, String postgresPassword, String tableName) {
+        String triggerName = "set_updated_at"; // Name of the trigger
+        String triggerFunction = "CREATE OR REPLACE FUNCTION update_updated_at_column() " +
+                                 "RETURNS TRIGGER AS $$ " +
+                                 "BEGIN " +
+                                 "NEW.updated_at = NOW(); " +
+                                 "RETURN NEW; " +
+                                 "END; $$ LANGUAGE plpgsql;";
+    
+        String createTrigger = String.format(
+            "CREATE TRIGGER %s BEFORE INSERT OR UPDATE ON %s " +
+            "FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();", triggerName, tableName);
+    
+        String checkTriggerExists = String.format(
+            "SELECT 1 FROM pg_trigger WHERE tgname = '%s' AND tgrelid = '%s'::regclass;", 
+            triggerName, tableName);
+    
+            try (Connection connection = DriverManager.getConnection(postgresUrl, postgresUser, postgresPassword);
+            Statement statement = connection.createStatement()) {
+   
+           // Check if the trigger exists
+           ResultSet resultSet = statement.executeQuery(checkTriggerExists);
+           boolean triggerExists = false;
+           if (resultSet.next()) {
+               triggerExists = true;
+           }
+           resultSet.close();
+   
+           if (triggerExists) {
+               System.out.println("Trigger already exists for table: " + tableName + ". Reusing old trigger.");
+           } else {
+               // Create the trigger function if it doesn't exist
+               statement.execute(triggerFunction);
+   
+               // Create the trigger for the specific table
+               statement.execute(createTrigger);
+   
+               System.out.println("Trigger created successfully for table: " + tableName);
+           }
+       } catch (SQLException e) {
+           System.err.println("Error ensuring trigger for table: " + tableName);
+           e.printStackTrace();
+       }
+    }
+    
+
 
     public void runETL(String postgresUrl, String postgresUser, String postgresPassword, 
                        String clickhouseUrl, String clickhouseUser, String clickhousePassword) {
@@ -147,6 +193,9 @@ public class ETLService {
             createLastExtractedTimeTable(postgresUrl, postgresUser, postgresPassword);
 
             for (String tableName : tableNames) {
+                // Make sure we have trigger for detecting UPDATE and INSERT
+                createUpdateTrigger(postgresUrl, postgresUser, postgresPassword, tableName);
+
                 // III. Pre ETL process: Handle deleted rows
                 GetDeletedRows.createTrigger(postgresUrl, postgresUser, postgresPassword, tableName);
                 List<Map<String, Object>> deletedRows = GetDeletedRows.getDeletedRows(postgresUrl, postgresUser, postgresPassword, tableName);
@@ -197,8 +246,6 @@ public class ETLService {
 
                 // Get primary key of current table to avoid OLAP duplicate update
                 String primaryKey = LoadToClickHouse.getPrimaryKey(postgresUrl, postgresUser, postgresPassword, tableName);
-                System.out.println("primaryKey is: " + primaryKey);
-                System.out.println(primaryKey == null);
 
                 // Only perform transform and load if we attracted data
                 if (resultSet != null && resultSet.isBeforeFirst()) {
@@ -206,8 +253,7 @@ public class ETLService {
                     List<Map<String, List<Object>>> transformedData = TransformService.transformColumnToRow(resultSet);
                     
                     // Step 3: Load the transformed data into ClickHouse in batches
-                    
-                    System.out.println("here!");                    
+                          
                     // LoadToClickHouse.loadData(transformedData, tableName, clickhouseUrl, clickhouseUser, clickhousePassword);
                     LoadToClickHouse.loadData(transformedData, clickhouseUrl, clickhouseUser, clickhousePassword, tableName, databaseName, primaryKey);
                 } else {

@@ -43,8 +43,42 @@
             font-size: 18px;
             color: #333;
         }
+        #countdown {
+            font-size: 16px;
+            color: #666;
+            margin-top: 10px;
+        }
     </style>
     <script>
+        let etlInterval = null;
+        let countdownInterval = null;
+        let countdownTime = 60;
+
+        function toggleETL() {
+            const button = document.getElementById('etlButton');
+
+            if (etlInterval === null) {
+                // Start the ETL process
+                button.innerText = 'Stop ETL';
+
+                // Call the function immediately and then set it to repeat every 60 seconds
+                startETL();
+                etlInterval = setInterval(startETL, 60000);
+
+                // Start the countdown
+                startCountdown();
+            } else {
+                // Stop the ETL process
+                button.innerText = 'Start ETL';
+                clearInterval(etlInterval);
+                clearInterval(countdownInterval);
+                etlInterval = null;
+                countdownInterval = null;
+                document.getElementById('notification').innerText = 'ETL Process Stopped.';
+                document.getElementById('countdown').innerText = '';
+            }
+        }
+
         function startETL() {
             // Gather input values
             const postgresUrl = document.getElementById('postgresUrl').value;
@@ -58,7 +92,7 @@
 
             document.getElementById('notification').innerText = 'ETL Process Started...';
 
-            // Call the ETL endpoint via a fetch request, sending the connection details
+            // Call the ETL endpoint via a fetch request
             fetch('/start-etl', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -126,10 +160,26 @@
                     document.getElementById('notification').innerHTML = `${message}<br>`;
                 })
                 .catch(error => {
-                    document.getElementById('notification').innerText = `Error: ${error}<br>`;
+                    document.getElementById('notification').innerText = `Error: ${error}`;
                 });
+
+            // Reset countdown
+            countdownTime = 60;
         }
-        
+
+        function startCountdown() {
+            const countdownElement = document.getElementById('countdown');
+            countdownTime = 60;
+            countdownInterval = setInterval(() => {
+                if (countdownTime > 0) {
+                    countdownTime--;
+                    countdownElement.innerText = `Next ETL in: ${countdownTime} seconds`;
+                } else {
+                    countdownElement.innerText = 'Starting next ETL...';
+                }
+            }, 1000);
+        }
+
         function startOLAP() {
             window.location.href = 'olap';
         }
@@ -178,7 +228,7 @@
         <h1>Trigger ETL Process</h1>
         <div class="form-container">
             <label for="postgresUrl">OLTP Database URL:</label>
-            <input type="text" id="postgresUrl" value="jdbc:postgresql://localhost:5432/social_media">
+            <input type="text" id="postgresUrl" value="jdbc:postgresql://10.130.12.97:5432/social_media">
 
             <label for="postgresUser">OLTP Username:</label>
             <input type="text" id="postgresUser" value="postgres">
@@ -187,7 +237,7 @@
             <input type="password" id="postgresPassword" value="dbos">
 
             <label for="clickhouseUrl">OLAP Database URL:</label>
-            <input type="text" id="clickhouseUrl" value="jdbc:clickhouse://localhost:8123">
+            <input type="text" id="clickhouseUrl" value="jdbc:clickhouse://10.130.12.101:8123">
 
             <label for="clickhouseUser">OLAP Username:</label>
             <input type="text" id="clickhouseUser" value="default">
@@ -211,4 +261,3 @@
     </div>
 </body>
 </html>
-
