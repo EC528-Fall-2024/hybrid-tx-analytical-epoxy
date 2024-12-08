@@ -195,15 +195,21 @@ public class ETLService {
                 // Update last extract time
                 updateLastExtractedTime(postgresUrl, postgresUser, postgresPassword, tableName);
 
-              
+                // Get primary key of current table to avoid OLAP duplicate update
+                String primaryKey = LoadToClickHouse.getPrimaryKey(postgresUrl, postgresUser, postgresPassword, tableName);
+                System.out.println("primaryKey is: " + primaryKey);
+                System.out.println(primaryKey == null);
+
                 // Only perform transform and load if we attracted data
                 if (resultSet != null && resultSet.isBeforeFirst()) {
                     // Step 2: Transform data from column-based to row-based
                     List<Map<String, List<Object>>> transformedData = TransformService.transformColumnToRow(resultSet);
                     
                     // Step 3: Load the transformed data into ClickHouse in batches
+                    
+                    System.out.println("here!");                    
                     // LoadToClickHouse.loadData(transformedData, tableName, clickhouseUrl, clickhouseUser, clickhousePassword);
-                    LoadToClickHouse.loadData(transformedData, clickhouseUrl, clickhouseUser, clickhousePassword, tableName, databaseName);
+                    LoadToClickHouse.loadData(transformedData, clickhouseUrl, clickhouseUser, clickhousePassword, tableName, databaseName, primaryKey);
                 } else {
                     System.out.println("Already updated since previous ETL!");
                 }
