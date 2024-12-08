@@ -276,6 +276,19 @@ Statement statement = connection.createStatement();
 statement.executeUpdate(query);
 ```
 
+### 3. Transaction for ACID
+To ensure we rollback if any mistake happened during ETL process, we wrapped the whole ETL process in a transaction:
+```java
+// Start transaction
+Connection postgresConnection.setAutoCommit(false); 
+Statement postgresStatement = postgresConnection.createStatement();
+
+// Our ETL Process...
+
+// Commit transactions
+postgresConnection.commit();
+```
+
 ### `Load`
 **a. Establishing Connection:**
 
