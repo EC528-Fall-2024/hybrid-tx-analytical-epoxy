@@ -12,20 +12,13 @@ import org.springframework.http.HttpStatus;
 import org.dbos.apiary.etldemo.clickhouse.ClickHouseService;
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
 import java.sql.SQLException;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.dbos.apiary.postgres.PostgresConnection;
-import org.dbos.apiary.utilities.ApiaryConfig;
-import org.dbos.apiary.worker.ApiaryNaiveScheduler;
-import org.dbos.apiary.worker.ApiaryWorker;
 import org.dbos.apiary.client.ApiaryWorkerClient;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import java.util.HashMap;
 import org.dbos.apiary.etldemo.etl.DatabaseModifier;
 
 @Controller
