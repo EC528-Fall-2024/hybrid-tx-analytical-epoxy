@@ -206,8 +206,7 @@ public class ETLService {
                     List<Map<String, List<Object>>> transformedData = TransformService.transformColumnToRow(resultSet);
                     
                     // Step 3: Load the transformed data into ClickHouse in batches
-                    
-                    System.out.println("here!");                    
+                                 
                     // LoadToClickHouse.loadData(transformedData, tableName, clickhouseUrl, clickhouseUser, clickhousePassword);
                     LoadToClickHouse.loadData(transformedData, clickhouseUrl, clickhouseUser, clickhousePassword, tableName, databaseName, primaryKey);
                 } else {
