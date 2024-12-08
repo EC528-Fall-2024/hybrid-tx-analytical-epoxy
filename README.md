@@ -223,17 +223,19 @@ Stretch Goals:
 
 ## 6.   How to utilize this Github:
 
-first identify if your databses are local or if they are public. Both databases must be either both local or both public.
+First, identify whether your databases are local or public. They must be either both local or both public.
 
 If the databases are **public**:
-- Make sure both databases have public IP, a public port number, and that you know the username and pasword
+- Make sure both databases have public IP, a public port number, and a username and password
 - Access the website throught this link : https://etl-service-hybrid-tx-analytical-epoxy-31f481.apps.shift.nerc.mghpcc.org/
-- For more explination or step by step explination follow the steps inside the CloudReadMe.md file inside the ETL folder.
+- For a step by step explaination follow the steps inside the [CloudReadMe.md](https://github.com/EC528-Fall-2024/hybrid-tx-analytical-epoxy/blob/main/apiary/etl-demo/CloudReadMe.md) file inside the ETL folder.
       
 If the databases are **local**:
 - Clone this GitHub
 - Save the docker image inside Apiary scripts folder 
-- Follow the steps inside the README.md file insside the ETL folder.
+- Follow the steps inside the ETL [README.md](https://github.com/EC528-Fall-2024/hybrid-tx-analytical-epoxy/blob/main/apiary/etl-demo/README.md) file.
+
+If you are interested in using our mock datasets, follow the setup [here](https://github.com/EC528-Fall-2024/hybrid-tx-analytical-epoxy/blob/main/apiary/SETUP.md).
 
 
 ## 7.  Release Planning:

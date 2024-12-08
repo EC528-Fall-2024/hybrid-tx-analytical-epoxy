@@ -1,91 +1,70 @@
-# Apiary
-Requires Java 11 and maven:
+# Social Media Mock App Setup
 
-    sudo apt install openjdk-11-jdk maven libatomic1
+This is a step-by-step tutorial on creating and adding mock data onto your Postgres database to test ETL. If you have an existing dataset you want to test, find instructions on using it in [UPLOAD_DS.md](https://github.com/EC528-Fall-2024/hybrid-tx-analytical-epoxy/blob/main/apiary/UPLOAD_DS.md).
 
-Also requires VoltDB; set the following environment variables:
+## Create Mock Data
 
-    export VOLT_HOME=/path/to/voltdb
-    export PATH="$VOLT_HOME/bin:$PATH"
+We created a python script to create three SQL files with mock data. The schemas is as follows:
 
-To initialize VoltDB, run its startup script:
-
-    scripts/initialize_voltdb.sh
-
-To compile and run unit tests:
-
-    mvn package
-
-## Quick Test with Docker
-You could use Docker containers to deploy database servers and quickly test Apiary.
-
-Install Docker:
 ```
-sudo apt install docker.io
-```
-
-After installation, if you want to run `docker` command without sudo, please follow the instructions [here](https://docs.docker.com/engine/install/linux-postinstall/).
-
-Start a VoltDB instance with Docker:
-```
-scripts/initialize_voltdb_docker.sh
+Users
+    user_id (INTEGER)
+    username (STRING)
+    email (STRING)
+    created_at (DATETIME)
+    
+Posts
+    post_id (INTEGER)
+    user_id (INTEGER) (Reference: Users.user_id)
+    content (STRING)
+    created_at (DATETIME)
+    
+Likes
+    like_id (INTEGER)
+    user_id (INTEGER) (Reference: Users.user_id)
+    post_id (INTEGER) (Reference: Posts.post_id)
+    created_at (DATETIME)
 ```
 
-Start a Postgres instance with Docker:
-```
-scripts/initialize_postgres_docker.sh
-```
-
-Start a Vertica instance with Docker:
-```
-scripts/initialize_vertica_docker.sh
-```
-
-Now you could run some Apiary unit tests!
-```
-mvn test
-```
-All should pass.
-
-## Add SQL Data to Postgres
-
-We have created three tables (`users`, `posts`, and `likes`) with dummy data to show an example of our epoxy being used on a mock social media application. Here is how to add this data to the docker file:
-
-1. Go to the `sql/dummy-data` directory. ***NOTE: THIS IS IMPORTANT**
+To propogate these three files onto your local environment, first go to the `sql/dummy-data` directory. This step is important; we want the data to reside in this directory.
 
     ```
     cd apiary/sql/dummy-data
     ```
+    
+Next, we can run `testing_data_generator.py`:
 
-2. Run the `testing_data_generator.py` python script to create the three .csv files.
-
-    ```
-    py testing_data_generator.py
-    ```
-
-1. Ensure your docker file is initialized and running. To see if it is, you can run the Docker app or check on cli.
-
-    ```
-    docker ps
-    ```
-
-2. Run the `add_postgres_data.sh` file.
-
-    ```
-    cd ../..
-    scripts/add_postgres_data.sh
-    ```
-
-And you're done! You are now able to run the etl-demo on this propogated dummy data.
-
-
-## Elasticsearch
-
-Download the Elasticsearch binaries from [here](https://www.elastic.co/downloads/elasticsearch).
-
-Set `ES_HOME` to your Elasticsearch root directory.
-
-Set the password for the `elastic` user:
 ```
-bin/elasticsearch-reset-password -u elastic -i
+py testing_data_generator.py
 ```
+
+## Add Mock Data to Postgres
+
+First, ensure Postgres is deployed onto a Docker container:
+
+```
+scripts/initialize_postgres_docker.sh
+```
+
+You can check if it is running, and identify the database container ID
+
+```
+docker ps
+```
+
+To add your newly created data into the Postgres docker container, run the `add_postgres_data.sh` bash script:
+
+```
+scripts/add_postgres_data.sh
+```
+
+## Batching through mock traffic
+
+To test if this ETL process works, you can simulate traffic within our mock application. This will randomly add/remove a number of rows to all three tables. This number is set to be random, but you can manually set a number of rows to change in `social-media-traffic/simulate_traffic.py`
+
+```
+cd ../social-media-traffic
+py simulate_traffic.py
+```
+
+After a change has been made to the postgres data, you can rerun ETL to see that the process is faster and more efficient.

@@ -41,7 +41,7 @@ def generate_data():
         print("Connected to postgres!")
 
         # Randomize the number of users, posts, and likes
-        NUM_USERS =1024000
+        NUM_USERS = random.randint(ranges["USER_MIN"], ranges["USER_MAX"])
         NUM_POSTS = random.randint(ranges["POST_MIN"], ranges["POST_MAX"])
         NUM_LIKES = random.randint(ranges["LIKE_MIN"], ranges["LIKE_MAX"])
 
