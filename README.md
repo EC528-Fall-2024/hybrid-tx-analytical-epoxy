@@ -254,7 +254,7 @@ Sprint 5. Improve write performance <br>
 [Sprint video](https://www.youtube.com/watch?v=Dm_JDNXZeqU) | [Sprint slides](https://docs.google.com/presentation/d/1ysfmqq9K6bgN8biIrvzm6_Mv3thjAwAdyFL51icEy5w/edit?usp=sharing)
 
 Final Presentation <br>
-[Sprint video]() | [Sprint slides](https://docs.google.com/presentation/d/1ssBwoMaSTnvtMezVtAK3R31kx8wOWoFBRHocqDGdSe4/edit?usp=sharing)
+[Sprint video](https://youtu.be/nCgCyHWe0VY) | [Sprint slides](https://docs.google.com/presentation/d/1ssBwoMaSTnvtMezVtAK3R31kx8wOWoFBRHocqDGdSe4/edit?usp=sharing)
 
 ## 8.  Resources:
 
