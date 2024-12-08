@@ -48,6 +48,8 @@ mvn clean && mvn package && mvn spring-boot:run
 
 This should compile the system and a simple webpage built with Spring Boot will be hosted on `localhost:8081`. By visiting the webpage, you can see all of the parameters required to trigger the ETL process between the OLTP PostgreSQL and the OLAP ClickHouse database. Before starting the ETL process between the two databases, we need to first have data in the OLTP database to transfer over to the OLAP database! We compiled a quick method to generate mock "social media" data to trigger the ETL and observe the functionality of our program.
 
+For more detailed instructions and function explanation, please check [etl-demo_readme](https://github.com/EC528-Fall-2024/hybrid-tx-analytical-epoxy/tree/main/apiary/etl-demo)
+
 To generate this mock data go back to the sql folder in root and run the python script to generate mock data. Then, go back to the scripts folder in root and run `add_postgres_data.sh` to automatically add this mock data into the PostgreSQL database.
 
 ```shell
