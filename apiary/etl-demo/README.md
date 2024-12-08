@@ -40,7 +40,7 @@ Everything's ready!  To start the site, run in the `etl-demo` root directory:
 mvn clean && mvn package && mvn spring-boot:run
 ```
 
-Then, navigate to `localhost:8081` to view this new social network! You should see the Nectar homepage:
+Then, navigate to `localhost:8081` to view this new social network! You should see the ETL homepage:
 <img src='app_screenshot.jpg' width="500">
 
 We can start ETL process by clicking on the button.
